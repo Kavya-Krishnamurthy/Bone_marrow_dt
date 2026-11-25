@@ -1,8 +1,11 @@
-# Bone_marrow_dt: Marrow Dose Response
+# Bone_marrow_dt: Marrow Under Radiation
 
 An interactive, data-informed bone marrow simulation. Use it to explore radiation exposure scenarios and see modelled changes in hematopoietic cell populations over time. It is a preliminary step toward an AVATAR-specific digital twin.
 
 ## What it does
+
+The main screen is an **animated, labelled cross-section of bone marrow** that anyone can follow: bone, stem cells, young blood cells, fat cells and a blood vessel carrying finished cells. Press play and the numbers of cells on screen follow the model day by day. Radiation shows up as flashes (or, for space travel, single cosmic-ray tracks). Plain-language health meters, a narrated story for each day, a body map of where marrow is, and key-moment shortcuts sit beside it. Hover over any cell for an explanation. Everything below remains available under **Expert view**.
+
 
 * **Exposure scenarios**: acute, fractionated, protracted (for example a solar particle event) and chronic low-dose-rate exposure (for example deep-space GCR), with partial-body fields and shielded marrow.
 * **Hematopoietic response**: day-by-day stem cells, four progenitor pools and peripheral blood counts (ANC, platelets, hemoglobin, lymphocytes), graded with CTCAE v5 thresholds.
@@ -43,7 +46,9 @@ The tests check that the unexposed steady state is stable, that acute survival m
 | Path | Contents |
 |---|---|
 | `src/model.js` | Pure simulation, summary, calibration and CSV parsing (runs in the browser and in Node) |
-| `src/charts.js` | Dependency-free SVG charts with a synced crosshair |
+| `src/scene.js` | Canvas illustration of the marrow: animated cells, radiation effects and labels |
+| `src/story.js` | Plain-language narration, health meters and key moments |
+| `src/charts.js` | Dependency-free SVG charts with a synced crosshair (expert view) |
 | `src/app.js` | UI controller |
 | `index.html`, `styles.css` | Page and theme (light and dark) |
 | `scripts/build.mjs` | Single-file bundler |

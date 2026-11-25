@@ -1,8 +1,10 @@
 import {
-  simulate, summarize, expandExposures, fitProfile, parseObservationsCSV,
+  simulate, summarize, expandExposures, totalDose, fitProfile, parseObservationsCSV,
   SCENARIOS, scenarioConfig, DEFAULT_PARAMS, DEFAULT_PROFILE, LINEAGES, LINEAGE_INFO, CTCAE,
 } from './model.js';
 import { lineChart, timelineChart, createHub, fmtNum, fmtPct } from './charts.js';
+import { createScene, drawIcon, CELL_INFO } from './scene.js';
+import { LAY_LINEAGE, STATUS_WORDS, levelsAt, healthAt, narrate, keyMoments, describeDose, describeField } from './story.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -162,6 +164,7 @@ function syncControls() {
   syncParamInputs();
   renderExposureList();
   syncOutputs();
+  syncSimple();
 }
 
 function syncOutputs() {
@@ -493,8 +496,9 @@ function renderAll() {
   const sum = summarize(res);
   state.last = { cfg, res, sum };
   renderSummary();
-  renderCharts();
+  if ($('expert').open) renderCharts();
   if (state.showTable) renderTable();
+  onModelUpdated();
 }
 
 function renderSummary() {
@@ -638,6 +642,7 @@ function renderCharts() {
     ariaLabel: `Marrow stem cell and progenitor pools over ${days} days, log scale.`,
   });
   renderMarrowLegend(Boolean(cmp));
+  hub.setToday(play.day);
 }
 
 function renderMarrowLegend(withCompare) {
@@ -719,9 +724,543 @@ function resultsCSV() {
   return lines.join('\n');
 }
 
+// =====================================================================
+// Illustrated, plain-language view
+// =====================================================================
+
+const ICON = {
+  trefoil: (fill, extra = '') => `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="${fill}"/>${trefoilPath('#2a1f00')}${extra}</svg>`,
+};
+function trefoilPath(color) {
+  let d = '';
+  for (let k = 0; k < 3; k++) {
+    const a0 = (-90 + k * 120 - 30) * (Math.PI / 180);
+    const a1 = (-90 + k * 120 + 30) * (Math.PI / 180);
+    const r0 = 6.5;
+    const r1 = 17;
+    const p = (r, a) => `${(24 + r * Math.cos(a)).toFixed(2)} ${(24 + r * Math.sin(a)).toFixed(2)}`;
+    d += `M${p(r0, a0)} L${p(r1, a0)} A${r1} ${r1} 0 0 1 ${p(r1, a1)} L${p(r0, a1)} A${r0} ${r0} 0 0 0 ${p(r0, a0)} Z `;
+  }
+  return `<path d="${d}" fill="${color}"/><circle cx="24" cy="24" r="4" fill="${color}"/>`;
+}
+const SCENARIO_ICONS = {
+  'acute-2': ICON.trefoil('#f5d547'),
+  'acute-4': ICON.trefoil('#f39a3d'),
+  'acute-4-gcsf': ICON.trefoil('#f39a3d', '<g transform="translate(29 27) rotate(45)"><rect x="0" y="0" width="16" height="7" rx="2" fill="#fff" stroke="#2a1f00" stroke-width="1.6"/><rect x="16" y="2.5" width="5" height="2" fill="#2a1f00"/><rect x="-3" y="1.5" width="3" height="4" fill="#2a1f00"/></g>'),
+  'partial-6': '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#cdbff0"/><path d="M24 9 L37 14 V24 C37 32 31 37 24 40 C17 37 11 32 11 24 V14 Z" fill="#6a3fc1"/><path d="M24 9 L37 14 V24 C37 32 31 37 24 40 Z" fill="#8f6ad6"/></svg>',
+  'tbi-12': '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#bfe3dc"/><rect x="19" y="11" width="10" height="26" rx="2" fill="#0d7c6a"/><rect x="11" y="19" width="26" height="10" rx="2" fill="#0d7c6a"/></svg>',
+  spe: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#1e2350"/><circle cx="24" cy="24" r="8" fill="#ffcc3d"/>' + Array.from({ length: 10 }, (_, i) => { const a = (i / 10) * Math.PI * 2; return `<line x1="${24 + 11 * Math.cos(a)}" y1="${24 + 11 * Math.sin(a)}" x2="${24 + 17 * Math.cos(a)}" y2="${24 + 17 * Math.sin(a)}" stroke="#ffcc3d" stroke-width="2.4" stroke-linecap="round"/>`; }).join('') + '</svg>',
+  'gcr-mars': '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#141836"/><circle cx="26" cy="26" r="11" fill="#d8643a"/><circle cx="22" cy="23" r="2.5" fill="#b44a26"/><circle cx="30" cy="30" r="1.8" fill="#b44a26"/><circle cx="12" cy="13" r="1" fill="#fff"/><circle cx="36" cy="11" r="1.2" fill="#fff"/><circle cx="10" cy="34" r="0.9" fill="#fff"/><line x1="6" y1="40" x2="16" y2="30" stroke="#c8f04a" stroke-width="1.4"/></svg>',
+};
+const LAY_SCENARIOS = {
+  'acute-2': { tag: 'Accident', name: 'Brief exposure', blurb: 'A worker gets 2 Gy all at once.' },
+  'acute-4': { tag: 'Accident', name: 'Severe exposure', blurb: '4 Gy all at once, no treatment.' },
+  'acute-4-gcsf': { tag: 'Accident', name: 'Severe, then treated', blurb: '4 Gy, then white-cell booster shots.' },
+  'partial-6': { tag: 'Accident', name: 'Partly shielded', blurb: '6 Gy, but 40% of the marrow was protected.' },
+  'tbi-12': { tag: 'Hospital', name: 'Cancer treatment', blurb: 'Whole-body radiation before a stem-cell transplant.' },
+  spe: { tag: 'Space', name: 'Solar storm', blurb: 'An astronaut gets 1.5 Gy over 12 hours.' },
+  'gcr-mars': { tag: 'Space', name: 'Trip to Mars', blurb: 'Cosmic rays every day for 2½ years.' },
+};
+const LEGEND_TYPES = ['hsc', 'prog_neutrophil', 'prog_rbc', 'prog_platelet', 'prog_lymphocyte', 'neutrophil', 'rbc', 'platelet', 'lymphocyte', 'fat'];
+const DOSE_LOG_MIN = Math.log10(0.005);
+const DOSE_LOG_MAX = Math.log10(15);
+const DOSE_TICKS = [
+  { d: 0.01, top: '0.01 Gy', label: 'CT scan', row: 0 },
+  { d: 0.45, top: '0.45', label: 'Mars trip', row: 0 },
+  { d: 4, top: '4', label: 'Deadly', row: 0 },
+  { d: 12, top: '12', label: 'Transplant prep', row: 1 },
+];
+const MODE_TEXT = {
+  instant: 'A sudden exposure, like an accident. Cells get no time to repair between hits.',
+  hours: 'Spreading the dose out gives cells time to repair some damage, so the harm is smaller.',
+  split: 'Radiotherapy is split into sessions, 12 hours apart, so healthy cells can repair in between.',
+  daily: 'Like space travel: a tiny dose each day. Cells repair and replace losses as they go.',
+};
+
+const play = { day: -2, playing: false, speed: 1, lastT: 0, lastUi: 0, prevDay: -2 };
+let scene;
+const meterEls = {};
+const legendEls = {};
+
+function dayMin() {
+  return -Math.max(1, state.days * 0.03);
+}
+const sliderToDose = (v) => Math.pow(10, DOSE_LOG_MIN + (v / 1000) * (DOSE_LOG_MAX - DOSE_LOG_MIN));
+const doseToSlider = (d) => Math.round(((Math.log10(Math.max(0.005, d)) - DOSE_LOG_MIN) / (DOSE_LOG_MAX - DOSE_LOG_MIN)) * 1000);
+function niceDose(d) {
+  if (d < 0.01) return Math.round(d * 10000) / 10000;
+  if (d < 1) return Math.round(d * 100) / 100;
+  return Math.round(d * 10) / 10;
+}
+function fmtDose(d) {
+  if (d < 0.1) return `${fmtNum(d * 1000, 0)} mGy`;
+  return `${fmtNum(d, d < 1 ? 2 : 1)} Gy`;
+}
+
+function deriveSimple() {
+  const ex = state.exposures;
+  const total = totalDose(ex);
+  const chronic = ex.find((e) => e.kind === 'chronic');
+  const acute = ex.find((e) => e.kind !== 'chronic');
+  let mode = 'instant';
+  if (chronic && !acute) mode = 'daily';
+  else if (acute && (acute.fractions || 1) > 1) mode = 'split';
+  else if (acute && (acute.durationHours || 0) >= 0.5) mode = 'hours';
+  return {
+    total,
+    mode,
+    hours: acute?.durationHours >= 0.5 ? acute.durationHours : 12,
+    sessions: (acute?.fractions || 1) > 1 ? acute.fractions : 6,
+    start: acute?.day ?? 0,
+  };
+}
+
+function applySimple(changes) {
+  const cur = { ...deriveSimple(), ...changes };
+  const total = Math.max(0.005, cur.total);
+  const start = cur.start || 0;
+  if (cur.mode === 'daily') {
+    state.exposures = [{ kind: 'chronic', startDay: 0, endDay: state.days, ratemGyPerDay: (total * 1000) / state.days }];
+  } else if (cur.mode === 'split') {
+    const n = Math.round(cur.sessions);
+    state.exposures = [{ kind: 'acute', day: start, dose: total / n, fractions: n, intervalHours: 12, durationHours: 0.25 }];
+  } else if (cur.mode === 'hours') {
+    state.exposures = [{ kind: 'acute', day: start, dose: total, durationHours: cur.hours, fractions: 1, intervalHours: 24 }];
+  } else {
+    state.exposures = [{ kind: 'acute', day: start, dose: total, durationHours: 0, fractions: 1, intervalHours: 24 }];
+  }
+  markEdited();
+  renderExposureList();
+  schedule();
+}
+
+function buildScenarioCards() {
+  const wrap = $('scenario-cards');
+  wrap.replaceChildren();
+  for (const s of SCENARIOS) {
+    const lay = LAY_SCENARIOS[s.id] || { tag: s.group, name: s.name, blurb: s.note };
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'scard';
+    b.setAttribute('role', 'radio');
+    b.dataset.id = s.id;
+    b.innerHTML = SCENARIO_ICONS[s.id] || '';
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = lay.tag;
+    const n = document.createElement('strong');
+    n.textContent = lay.name;
+    const sm = document.createElement('small');
+    sm.textContent = lay.blurb;
+    b.append(tag, n, sm);
+    b.addEventListener('click', () => {
+      loadScenario(s.id);
+      syncControls();
+      renderAll();
+      restartPlayback();
+    });
+    wrap.append(b);
+  }
+}
+
+function buildDoseScale() {
+  const el = $('dose-scale');
+  el.replaceChildren();
+  for (const t of DOSE_TICKS) {
+    const pos = (doseToSlider(t.d) / 1000) * 100;
+    const d = document.createElement('div');
+    d.className = 'dose-tick' + (t.row ? ' row2' : '') + (pos > 93 ? ' edge-r' : pos < 8 ? ' edge-l' : '');
+    d.style.left = pos + '%';
+    const a = document.createElement('span');
+    a.textContent = t.top;
+    const b = document.createElement('span');
+    b.textContent = t.label;
+    d.append(a, b);
+    el.append(d);
+  }
+}
+
+function buildMeters() {
+  const wrap = $('meters');
+  wrap.replaceChildren();
+  for (const l of ['neutrophil', 'platelet', 'rbc', 'lymphocyte']) {
+    const info = LAY_LINEAGE[l];
+    const m = document.createElement('div');
+    m.className = 'meter';
+    m.innerHTML = '<div class="meter-top"><div class="meter-name"><strong></strong><small></small></div><span class="meter-status"><span class="ico"></span><span class="word"></span></span></div><div class="meter-bar"><div class="meter-fill"></div></div><div class="meter-foot"><span class="pct"></span><span class="abs"></span></div>';
+    m.querySelector('strong').textContent = info.title;
+    m.querySelector('small').textContent = info.sub;
+    const bar = m.querySelector('.meter-bar');
+    const base = state.profile.baseline[l];
+    const bounds = CTCAE[l];
+    for (const b of [bounds[2], bounds[3]]) {
+      if (b == null) continue;
+      const t = document.createElement('div');
+      t.className = 'meter-tick';
+      t.style.left = (Math.min(1.3, b / base) / 1.3) * 100 + '%';
+      bar.append(t);
+    }
+    wrap.append(m);
+    meterEls[l] = {
+      fill: m.querySelector('.meter-fill'),
+      ico: m.querySelector('.ico'),
+      word: m.querySelector('.word'),
+      pct: m.querySelector('.pct'),
+      abs: m.querySelector('.abs'),
+    };
+  }
+}
+
+function buildLegend() {
+  const wrap = $('cell-legend');
+  wrap.replaceChildren();
+  for (const type of LEGEND_TYPES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cell-chip';
+    const c = document.createElement('canvas');
+    drawIcon(c, type);
+    const txt = document.createElement('div');
+    const n = document.createElement('strong');
+    n.textContent = CELL_INFO[type].name;
+    const v = document.createElement('span');
+    txt.append(n, v);
+    b.append(c, txt);
+    const show = (ev) => {
+      scene.setHighlight(type);
+      const r = b.getBoundingClientRect();
+      showInfoTip(type, ev?.clientX ?? r.left + r.width / 2, ev?.clientY ?? r.top);
+    };
+    const hide = () => { scene.setHighlight(null); $('tooltip').hidden = true; };
+    b.addEventListener('pointerenter', show);
+    b.addEventListener('pointerleave', hide);
+    b.addEventListener('focus', () => show());
+    b.addEventListener('blur', hide);
+    wrap.append(b);
+    legendEls[type] = v;
+  }
+}
+
+let currentLevels = null;
+function showInfoTip(type, x, y) {
+  const el = $('tooltip');
+  const info = CELL_INFO[type];
+  if (!info) { el.hidden = true; return; }
+  el.replaceChildren();
+  const h = document.createElement('div');
+  h.className = 'tt-title';
+  h.textContent = info.name;
+  const p = document.createElement('div');
+  p.className = 'tt-text';
+  p.textContent = info.text;
+  el.append(h, p);
+  if (currentLevels && currentLevels[type] != null) {
+    const v = document.createElement('div');
+    v.className = 'tt-head';
+    v.textContent = `${fmtPct(currentLevels[type])} of normal today`;
+    el.append(v);
+  }
+  el.hidden = false;
+  const w = el.offsetWidth;
+  const hh = el.offsetHeight;
+  let left = x + 14;
+  if (left + w > window.innerWidth - 8) left = x - 14 - w;
+  let top = y - hh - 12;
+  if (top < 8) top = y + 16;
+  el.style.left = Math.max(8, left) + 'px';
+  el.style.top = top + 'px';
+}
+
+function syncSimple() {
+  const s = deriveSimple();
+  $('dose-slider').value = doseToSlider(s.total);
+  $('dose-out').textContent = fmtDose(s.total);
+  $('dose-say').textContent = describeDose(s.total);
+  for (const b of $('mode-seg').querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset.mode === s.mode));
+  const sub = $('mode-sub');
+  const rng = $('mode-sub-range');
+  if (s.mode === 'hours') {
+    sub.hidden = false;
+    $('mode-sub-label').textContent = 'Spread over';
+    rng.min = 1; rng.max = 72; rng.step = 1;
+    rng.value = s.hours;
+    $('mode-sub-out').textContent = `${fmtNum(s.hours, 0)} hours`;
+  } else if (s.mode === 'split') {
+    sub.hidden = false;
+    $('mode-sub-label').textContent = 'Number of sessions';
+    rng.min = 2; rng.max = 12; rng.step = 1;
+    rng.value = s.sessions;
+    $('mode-sub-out').textContent = `${s.sessions} × ${fmtDose(s.total / s.sessions)}`;
+  } else {
+    sub.hidden = true;
+  }
+  $('mode-say').textContent = s.mode === 'daily'
+    ? `${MODE_TEXT.daily} About ${fmtNum((s.total * 1000) / Math.max(1, (state.exposures[0]?.endDay ?? state.days) - (state.exposures[0]?.startDay ?? 0)), 2)} mGy per day.`
+    : MODE_TEXT[s.mode];
+  $('fx-simple').value = state.fx;
+  $('fx-big').textContent = `${Math.round(state.fx * 100)}%`;
+  $('fx-say').textContent = describeField(state.fx);
+  $('rx-gcsf').checked = state.gcsf.on;
+  $('rx-tpo').checked = state.tpo.on;
+  $('rx-hsct').checked = state.hsct.on;
+  $('sens-simple').value = state.profile.radiosensitivity;
+  $('reserve-simple').value = state.profile.marrowReserve;
+  const word = (v, lo, hi) => (v < 0.85 ? lo : v > 1.15 ? hi : 'Typical');
+  $('sens-say').textContent = `${word(state.profile.radiosensitivity, 'Less sensitive', 'More sensitive')} (×${(+state.profile.radiosensitivity).toFixed(2)})`;
+  $('reserve-say').textContent = `${word(state.profile.marrowReserve, 'Slower', 'Faster')} (×${(+state.profile.marrowReserve).toFixed(2)})`;
+  for (const b of $('days-seg').querySelectorAll('button')) b.setAttribute('aria-checked', String(+b.dataset.days === state.days));
+  for (const c of $('scenario-cards').querySelectorAll('.scard')) c.setAttribute('aria-checked', String(!state.edited && c.dataset.id === state.scenarioId));
+  // Body figure
+  const h = 250 * state.fx;
+  $('field-rect').setAttribute('height', h);
+  $('shield-rect').setAttribute('y', h);
+  $('shield-rect').setAttribute('height', 250 - h);
+  $('field-edge').setAttribute('y1', h);
+  $('field-edge').setAttribute('y2', h);
+  $('field-edge').style.display = state.fx >= 0.99 ? 'none' : '';
+  $('body-caption').textContent = state.fx >= 0.99
+    ? 'The whole body is in the radiation field.'
+    : `About ${Math.round(state.fx * 100)}% of the marrow is in the field. The shielded ${Math.round((1 - state.fx) * 100)}% keeps making blood and helps refill the rest.`;
+}
+
+function bindSimple() {
+  $('dose-slider').addEventListener('input', (ev) => {
+    const d = niceDose(sliderToDose(+ev.target.value));
+    $('dose-out').textContent = fmtDose(d);
+    $('dose-say').textContent = describeDose(d);
+    applySimple({ total: d });
+  });
+  for (const b of $('mode-seg').querySelectorAll('button')) {
+    b.addEventListener('click', () => {
+      applySimple({ mode: b.dataset.mode });
+      syncSimple();
+    });
+  }
+  $('mode-sub-range').addEventListener('input', (ev) => {
+    const s = deriveSimple();
+    if (s.mode === 'hours') applySimple({ hours: +ev.target.value });
+    else if (s.mode === 'split') applySimple({ sessions: +ev.target.value });
+    syncSimple();
+  });
+  $('fx-simple').addEventListener('input', (ev) => {
+    state.fx = +ev.target.value;
+    markEdited();
+    syncControls();
+    schedule();
+  });
+  for (const [id, key] of [['rx-gcsf', 'gcsf'], ['rx-tpo', 'tpo'], ['rx-hsct', 'hsct']]) {
+    $(id).addEventListener('change', (ev) => {
+      state[key].on = ev.target.checked;
+      markEdited();
+      syncControls();
+      schedule();
+    });
+  }
+  $('sens-simple').addEventListener('input', (ev) => { state.profile.radiosensitivity = +ev.target.value; syncControls(); schedule(); });
+  $('reserve-simple').addEventListener('input', (ev) => { state.profile.marrowReserve = +ev.target.value; syncControls(); schedule(); });
+  for (const b of $('days-seg').querySelectorAll('button')) {
+    b.addEventListener('click', () => {
+      state.days = +b.dataset.days;
+      syncControls();
+      schedule(0);
+    });
+  }
+  $('expert').addEventListener('toggle', () => { if ($('expert').open) renderCharts(); });
+
+  // Player
+  $('play').addEventListener('click', () => (play.playing ? pause() : start()));
+  $('day-slider').addEventListener('input', (ev) => {
+    pause();
+    setDay(+ev.target.value);
+  });
+  $('speed').addEventListener('change', (ev) => { play.speed = +ev.target.value; });
+  $('labels-toggle').addEventListener('click', (ev) => {
+    const on = ev.currentTarget.getAttribute('aria-pressed') !== 'true';
+    ev.currentTarget.setAttribute('aria-pressed', String(on));
+    ev.currentTarget.textContent = on ? 'Labels on' : 'Labels off';
+    scene.setLabels(on);
+  });
+}
+
+function setPlayIcon() {
+  $('play-icon').setAttribute('d', play.playing ? 'M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z' : 'M7 4.5v15l12-7.5z');
+  $('play').setAttribute('aria-label', play.playing ? 'Pause' : 'Play');
+}
+function start() {
+  if (play.day >= state.days - 1e-6) setDay(dayMin(), { silent: true });
+  play.playing = true;
+  play.lastT = performance.now();
+  scene.setPlaying(true);
+  setPlayIcon();
+  requestAnimationFrame(tick);
+}
+function pause() {
+  play.playing = false;
+  scene?.setPlaying(false);
+  setPlayIcon();
+}
+function restartPlayback() {
+  pause();
+  setDay(dayMin(), { silent: true, instant: true });
+  if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) setTimeout(start, 350);
+}
+function tick(now) {
+  if (!play.playing) return;
+  const dt = Math.min(0.1, (now - play.lastT) / 1000);
+  play.lastT = now;
+  const span = state.days - dayMin();
+  // Whole time span plays in ~26 s; the first days after an exposure play slower so the drama is visible.
+  let rate = (span / 26) * play.speed;
+  if (play.day < 3 && state.days > 40) rate *= 0.35;
+  let next = play.day + rate * dt;
+  if (next >= state.days) {
+    next = state.days;
+    play.playing = false;
+    scene.setPlaying(false);
+    setPlayIcon();
+  }
+  setDay(next);
+  if (play.playing) requestAnimationFrame(tick);
+}
+
+function setDay(day, { silent = false, instant = false } = {}) {
+  const prev = play.day;
+  play.day = Math.max(dayMin(), Math.min(state.days, day));
+  if (!state.last) return;
+  const { res, cfg } = state.last;
+  const slider = $('day-slider');
+  slider.value = play.day;
+  // Radiation flashes for pulses crossed while moving forward.
+  if (!silent && play.day > prev) {
+    for (const p of expandExposures(cfg.exposures)) {
+      if (p.end - p.start > 30) continue;
+      if (p.start > prev && p.start <= play.day) {
+        scene.zap(Math.min(1, p.dose / 4));
+        const fr = $('field-rect');
+        fr.classList.remove('field-pulse');
+        void fr.getBoundingClientRect();
+        fr.classList.add('field-pulse');
+      }
+    }
+  }
+  const chronic = cfg.exposures.find((e) => e.kind === 'chronic');
+  scene.setChronic(Boolean(chronic && play.day >= chronic.startDay && play.day < chronic.endDay));
+  currentLevels = { ...levelsAt(res, play.day), fat: null };
+  scene.setLevels(currentLevels, { instant });
+  const now = performance.now();
+  if (play.playing && now - play.lastUi < 90) return;
+  play.lastUi = now;
+  updateReadout();
+}
+
+function updateReadout() {
+  const { res, cfg, sum } = state.last;
+  const day = play.day;
+  const lv = currentLevels;
+  const before = day < 0;
+  const dayTxt = before ? 'Before' : `Day ${Math.floor(day)}`;
+  $('badge-day').textContent = dayTxt;
+  const chronic = cfg.exposures.find((e) => e.kind === 'chronic');
+  $('badge-sub').textContent = before ? 'exposure' : chronic ? 'of the mission' : 'after exposure';
+  $('story-day').textContent = before ? 'Before exposure' : `Day ${Math.floor(day)}`;
+  const n = narrate(res, sum, cfg, day);
+  $('story-title').textContent = n.title;
+  $('story-body').textContent = n.body;
+  const h = healthAt(res, day);
+  const ICONS = ['✓', '!', '!', '!!', '!!'];
+  for (const [l, el] of Object.entries(meterEls)) {
+    const g = h[l].grade;
+    el.fill.style.width = (Math.min(1.3, h[l].rel) / 1.3) * 100 + '%';
+    el.fill.style.backgroundColor = `var(--g${g})`;
+    el.ico.style.backgroundColor = `var(--g${g})`;
+    el.ico.style.color = g === 2 || g === 3 ? 'var(--pill-ink-dark)' : '#fff';
+    el.ico.textContent = ICONS[g];
+    el.word.textContent = STATUS_WORDS[g];
+    el.pct.textContent = `${fmtPct(h[l].rel)} of normal`;
+    el.abs.textContent = `${fmtNum(h[l].value)} ${LINEAGE_INFO[l].unit}`;
+  }
+  for (const [type, el] of Object.entries(legendEls)) {
+    el.textContent = type === 'fat' ? (lv.prog_neutrophil < 0.6 ? 'more than usual' : 'normal amount') : `${fmtPct(lv[type])} of normal`;
+  }
+  const prog = (lv.prog_neutrophil + lv.prog_rbc + lv.prog_platelet + lv.prog_lymphocyte) / 4;
+  scene.setLabelValues({ hsc: `${fmtPct(lv.hsc)} of normal`, marrow: `${fmtPct(prog)} of normal` });
+  hub.setToday(day);
+}
+
+function onModelUpdated() {
+  syncSimple();
+  buildMeters();
+  const { res, sum, cfg } = state.last;
+  const slider = $('day-slider');
+  slider.min = dayMin();
+  slider.max = state.days;
+  slider.step = Math.max(0.05, state.days / 800);
+  $('track-end').textContent = `Day ${state.days}`;
+  // Markers
+  const span = state.days - dayMin();
+  const pos = (d) => ((d - dayMin()) / span) * 100;
+  const marks = $('track-marks');
+  marks.replaceChildren();
+  const moments = keyMoments(res, sum, cfg);
+  for (const e of cfg.exposures.filter((x) => x.kind === 'chronic')) {
+    const b = document.createElement('div');
+    b.className = 'track-band';
+    b.style.left = pos(Math.max(0, e.startDay)) + '%';
+    b.style.width = pos(Math.min(state.days, e.endDay)) - pos(Math.max(0, e.startDay)) + '%';
+    marks.append(b);
+  }
+  for (const m of moments) {
+    const d = document.createElement('div');
+    d.className = `track-mark ${m.kind}`;
+    d.style.left = pos(m.day) + '%';
+    d.title = m.text;
+    marks.append(d);
+  }
+  const mw = $('moments');
+  mw.replaceChildren();
+  for (const m of moments) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'moment';
+    const i = document.createElement('i');
+    i.className = m.kind;
+    const dd = document.createElement('b');
+    dd.textContent = `Day ${fmtNum(m.day, 0)}`;
+    const t = document.createElement('span');
+    t.textContent = m.text;
+    b.append(i, dd, t);
+    b.addEventListener('click', () => {
+      pause();
+      setDay(m.day + (m.kind === 'zap' ? 0.3 : 0), { silent: m.kind !== 'zap' });
+      if (m.kind === 'zap') scene.zap(1);
+    });
+    mw.append(b);
+  }
+  if (play.day > state.days) play.day = state.days;
+  setDay(play.day, { silent: true });
+  updateReadout();
+}
+
+function initIllustrated() {
+  scene = createScene($('scene'), $('scene-labels'), {
+    onHover: (type, x, y) => {
+      if (!type) { $('tooltip').hidden = true; scene.setHighlight(null); return; }
+      showInfoTip(type, x, y);
+    },
+  });
+  buildScenarioCards();
+  buildDoseScale();
+  buildMeters();
+  buildLegend();
+  bindSimple();
+}
+
 // ---------- Boot ----------
 populateScenarioSelect();
 loadScenario(state.scenarioId);
+initIllustrated();
 syncControls();
 bindControls();
+play.day = dayMin();
 renderAll();
+restartPlayback();

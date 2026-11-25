@@ -4,199 +4,364 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <!-- BUILD:HEAD-START -->
-<title>Marrow Dose Response</title>
+<title>Marrow Under Radiation</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <!-- BUILD:HEAD-END -->
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <!-- BUILD:BODY-START -->
 <div class="app">
-  <header class="masthead">
-    <div class="masthead-text">
-      <p class="eyebrow">Hematopoietic radiation response · preliminary digital twin</p>
-      <h1>Marrow Dose Response</h1>
-      <p class="lede">Set an exposure, a person and any countermeasures. The model projects stem cells, marrow progenitors and blood counts day by day, using literature-informed parameters that you can calibrate against tissue-chip data.</p>
+  <header class="hero">
+    <p class="eyebrow">A look inside the body’s blood factory</p>
+    <h1>Marrow Under Radiation</h1>
+    <p class="lede">Bone marrow makes hundreds of billions of new blood cells every day. Pick a situation, press play, and watch what radiation does to that factory, how long it takes to recover, and which treatments help.</p>
+  </header>
+
+  <section class="stage" aria-label="Animated bone marrow">
+    <div class="scene-col">
+      <div class="scene-frame">
+        <canvas id="scene" aria-label="Illustration of bone marrow: bone at the top and bottom, stem cells near the bone, young blood cells and fat cells in the middle, and a blood vessel carrying finished cells." role="img"></canvas>
+        <div class="scene-labels" id="scene-labels"></div>
+        <div class="scene-badge" id="scene-badge">
+          <span class="badge-day" id="badge-day">Before</span>
+          <span class="badge-sub" id="badge-sub">exposure</span>
+        </div>
+        <button type="button" class="scene-toggle" id="labels-toggle" aria-pressed="true">Labels on</button>
+      </div>
+
+      <div class="player">
+        <button type="button" class="play-btn" id="play" aria-label="Play">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path id="play-icon" d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>
+        </button>
+        <div class="track">
+          <div class="track-marks" id="track-marks" aria-hidden="true"></div>
+          <input type="range" id="day-slider" aria-label="Day">
+          <div class="track-ends"><span>Before</span><span id="track-end"></span></div>
+        </div>
+        <label class="speed"><span class="sr-only">Playback speed</span>
+          <select id="speed">
+            <option value="0.5">Slow</option>
+            <option value="1" selected>Normal</option>
+            <option value="2">Fast</option>
+          </select>
+        </label>
+      </div>
+      <div class="moments" id="moments" aria-label="Key moments"></div>
+
+      <div class="cell-legend" id="cell-legend" aria-label="Cell types"></div>
     </div>
-    <div class="masthead-actions">
+
+    <aside class="readout">
+      <div class="story" aria-live="polite">
+        <p class="story-day" id="story-day"></p>
+        <h2 id="story-title"></h2>
+        <p id="story-body"></p>
+      </div>
+      <div class="meters" id="meters"></div>
+      <figure class="body-fig">
+        <svg viewBox="0 0 140 250" id="body-svg" aria-labelledby="body-caption" role="img">
+          <defs>
+            <clipPath id="body-clip">
+              <circle cx="70" cy="24" r="17"/>
+              <rect x="62" y="38" width="16" height="10" rx="3"/>
+              <path d="M40 50 Q70 42 100 50 L104 128 Q70 138 36 128 Z"/>
+              <rect x="20" y="52" width="16" height="78" rx="8" transform="rotate(8 28 52)"/>
+              <rect x="104" y="52" width="16" height="78" rx="8" transform="rotate(-8 112 52)"/>
+              <rect x="40" y="126" width="26" height="118" rx="11"/>
+              <rect x="74" y="126" width="26" height="118" rx="11"/>
+            </clipPath>
+            <pattern id="shield-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="var(--shield)" stroke-width="2"/>
+            </pattern>
+          </defs>
+          <g clip-path="url(#body-clip)">
+            <rect x="0" y="0" width="140" height="250" fill="var(--body)"/>
+            <rect id="field-rect" x="0" y="0" width="140" height="250" fill="var(--field)"/>
+            <rect id="shield-rect" x="0" y="250" width="140" height="0" fill="url(#shield-hatch)"/>
+          </g>
+          <g class="marrow-spots" fill="var(--marrow-spot)">
+            <ellipse cx="70" cy="16" rx="9" ry="5"/>
+            <rect x="67" y="54" width="6" height="30" rx="3"/>
+            <rect x="68" y="86" width="4" height="36" rx="2"/>
+            <path d="M48 62 Q58 58 64 62 M48 72 Q58 68 64 72 M76 62 Q82 58 92 62 M76 72 Q82 68 92 72" stroke="var(--marrow-spot)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="70" cy="124" rx="24" ry="8"/>
+            <rect x="48" y="134" width="9" height="26" rx="4"/>
+            <rect x="83" y="134" width="9" height="26" rx="4"/>
+            <rect x="26" y="58" width="7" height="16" rx="3" transform="rotate(8 28 58)"/>
+            <rect x="107" y="58" width="7" height="16" rx="3" transform="rotate(-8 112 58)"/>
+          </g>
+          <line id="field-edge" x1="4" x2="136" y1="250" y2="250" stroke="var(--field-edge)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        </svg>
+        <figcaption>
+          <strong>Where marrow is</strong>
+          <span>Red spots mark the bones that hold most adult marrow: skull, breastbone, ribs, spine, hips and the tops of the long bones.</span>
+          <span id="body-caption"></span>
+          <span class="fig-key"><i class="k-field"></i> in the radiation field <i class="k-shield"></i> shielded</span>
+        </figcaption>
+      </figure>
+    </aside>
+  </section>
+
+  <section class="step" aria-labelledby="step1">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">1</span>
+      <h2 id="step1">What happened?</h2>
+    </div>
+    <div class="scenario-cards" id="scenario-cards" role="radiogroup" aria-label="Scenario"></div>
+  </section>
+
+  <section class="step" aria-labelledby="step2">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">2</span>
+      <h2 id="step2">Change the details</h2>
+    </div>
+    <div class="knobs">
+      <div class="knob knob-dose">
+        <div class="knob-top">
+          <h3>How much radiation</h3>
+          <output class="big-value" id="dose-out"></output>
+        </div>
+        <input type="range" id="dose-slider" min="0" max="1000" step="1" aria-label="Radiation dose to the marrow">
+        <div class="dose-scale" id="dose-scale" aria-hidden="true"></div>
+        <p class="knob-say" id="dose-say"></p>
+        <p class="knob-note">Gy (gray) measures energy absorbed by the marrow. 1 Gy is 1,000 mGy.</p>
+      </div>
+
+      <div class="knob">
+        <h3>How it arrived</h3>
+        <div class="seg" id="mode-seg" role="radiogroup" aria-label="Delivery">
+          <button type="button" role="radio" data-mode="instant">All at once</button>
+          <button type="button" role="radio" data-mode="hours">Over hours</button>
+          <button type="button" role="radio" data-mode="split">In sessions</button>
+          <button type="button" role="radio" data-mode="daily">A little every day</button>
+        </div>
+        <label class="sub-knob" id="mode-sub"><span id="mode-sub-label"></span><output id="mode-sub-out"></output><input type="range" id="mode-sub-range"></label>
+        <p class="knob-say" id="mode-say"></p>
+      </div>
+
+      <div class="knob">
+        <div class="knob-top">
+          <h3>How much of the body</h3>
+          <output class="big-value" id="fx-big"></output>
+        </div>
+        <input type="range" id="fx-simple" min="0.1" max="1" step="0.05" aria-label="Share of marrow in the radiation field">
+        <p class="knob-say" id="fx-say"></p>
+      </div>
+
+      <div class="knob">
+        <h3>Treatment</h3>
+        <div class="rx-list">
+          <label class="rx"><input type="checkbox" id="rx-gcsf"><span><strong>White-cell booster</strong><small>G-CSF shots that push the marrow to make infection fighters faster.</small></span></label>
+          <label class="rx"><input type="checkbox" id="rx-tpo"><span><strong>Platelet booster</strong><small>A TPO-like drug that helps megakaryocytes and stem cells.</small></span></label>
+          <label class="rx"><input type="checkbox" id="rx-hsct"><span><strong>Stem-cell transplant</strong><small>Donor stem cells infused to rebuild a destroyed marrow.</small></span></label>
+        </div>
+      </div>
+
+      <div class="knob">
+        <h3>The person</h3>
+        <label class="sub-knob"><span>Sensitivity to radiation</span><output id="sens-say"></output><input type="range" id="sens-simple" min="0.4" max="2" step="0.05"></label>
+        <label class="sub-knob"><span>Speed of recovery</span><output id="reserve-say"></output><input type="range" id="reserve-simple" min="0.4" max="2" step="0.05"></label>
+        <p class="knob-note">People differ. A digital twin would set these from the person’s own cells grown on a tissue chip.</p>
+      </div>
+
+      <div class="knob">
+        <h3>How long to watch</h3>
+        <div class="seg seg-wrap" id="days-seg" role="radiogroup" aria-label="Time span">
+          <button type="button" role="radio" data-days="30">1 month</button>
+          <button type="button" role="radio" data-days="60">2 months</button>
+          <button type="button" role="radio" data-days="90">3 months</button>
+          <button type="button" role="radio" data-days="180">6 months</button>
+          <button type="button" role="radio" data-days="365">1 year</button>
+          <button type="button" role="radio" data-days="900">2½ years</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details class="expert" id="expert">
+    <summary>
+      <span class="step-num" aria-hidden="true">3</span>
+      <span><strong>Expert view</strong><small>Charts, exact inputs, model parameters, data table and calibration from tissue-chip data</small></span>
+    </summary>
+    <div class="expert-actions">
       <button type="button" id="pin-btn" class="btn">Pin as comparison</button>
       <button type="button" id="unpin-btn" class="btn btn-quiet" hidden>Clear comparison</button>
     </div>
-  </header>
+    <div class="layout">
+      <aside class="controls" aria-label="Simulation inputs">
+        <section class="panel">
+          <h2>Scenario</h2>
+          <label class="field">
+            <span>Preset</span>
+            <select id="scenario"></select>
+          </label>
+          <p class="hint" id="scenario-note"></p>
+          <label class="field">
+            <span>Time horizon</span>
+            <select id="days">
+              <option value="30">30 days</option>
+              <option value="60">60 days</option>
+              <option value="90">90 days</option>
+              <option value="180">180 days</option>
+              <option value="365">1 year</option>
+              <option value="900">900 days</option>
+            </select>
+          </label>
+        </section>
 
-  <div class="layout">
-    <aside class="controls" aria-label="Simulation inputs">
-      <section class="panel">
-        <h2>Scenario</h2>
-        <label class="field">
-          <span>Preset</span>
-          <select id="scenario"></select>
-        </label>
-        <p class="hint" id="scenario-note"></p>
-        <label class="field">
-          <span>Time horizon</span>
-          <select id="days">
-            <option value="30">30 days</option>
-            <option value="60">60 days</option>
-            <option value="90">90 days</option>
-            <option value="180">180 days</option>
-            <option value="365">1 year</option>
-            <option value="900">900 days</option>
-          </select>
-        </label>
-      </section>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Exposures</h2>
+            <div class="btn-row">
+              <button type="button" class="btn btn-small" id="add-acute">+ Acute</button>
+              <button type="button" class="btn btn-small" id="add-chronic">+ Chronic</button>
+            </div>
+          </div>
+          <div id="exposure-list" class="exposure-list"></div>
+          <p class="hint">Doses are absorbed dose to active marrow. A duration above 0 spreads the dose evenly; repair between increments lowers the effect.</p>
+        </section>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Exposures</h2>
+        <section class="panel">
+          <h2>Field geometry</h2>
+          <label class="field range">
+            <span>Marrow in the field <output id="fx-out"></output></span>
+            <input type="range" id="fx" min="0.1" max="1" step="0.05">
+          </label>
+          <label class="field range">
+            <span>Dose to shielded marrow <output id="shield-out"></output></span>
+            <input type="range" id="shield" min="0" max="0.5" step="0.05">
+          </label>
+        </section>
+
+        <section class="panel">
+          <h2>Countermeasures</h2>
+          <div class="iv">
+            <label class="check"><input type="checkbox" id="gcsf-on"> G-CSF (filgrastim-like)</label>
+            <div class="iv-fields">
+              <label class="field mini"><span>Start day</span><input type="number" id="gcsf-start" min="0" step="1"></label>
+              <label class="field mini"><span>Stop day</span><input type="number" id="gcsf-end" min="0" step="1"></label>
+            </div>
+          </div>
+          <div class="iv">
+            <label class="check"><input type="checkbox" id="tpo-on"> TPO receptor agonist (romiplostim-like)</label>
+            <div class="iv-fields">
+              <label class="field mini"><span>Start day</span><input type="number" id="tpo-start" min="0" step="1"></label>
+              <label class="field mini"><span>Stop day</span><input type="number" id="tpo-end" min="0" step="1"></label>
+            </div>
+          </div>
+          <div class="iv">
+            <label class="check"><input type="checkbox" id="hsct-on"> Stem-cell infusion</label>
+            <div class="iv-fields">
+              <label class="field mini"><span>Day</span><input type="number" id="hsct-day" min="0" step="1"></label>
+              <label class="field mini"><span>Graft (% of normal HSC pool)</span><input type="number" id="hsct-dose" min="0.1" max="50" step="0.5"></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Individual profile</h2>
+          <div class="grid-2">
+            <label class="field mini"><span>ANC ×10⁹/L</span><input type="number" id="b-neutrophil" min="0.5" max="15" step="0.1"></label>
+            <label class="field mini"><span>Platelets ×10⁹/L</span><input type="number" id="b-platelet" min="50" max="600" step="5"></label>
+            <label class="field mini"><span>Hgb g/dL</span><input type="number" id="b-rbc" min="6" max="20" step="0.1"></label>
+            <label class="field mini"><span>ALC ×10⁹/L</span><input type="number" id="b-lymphocyte" min="0.3" max="6" step="0.1"></label>
+          </div>
+          <label class="field range">
+            <span>Radiosensitivity <output id="sens-out"></output></span>
+            <input type="range" id="sens" min="0.4" max="2" step="0.05">
+          </label>
+          <label class="field range">
+            <span>Marrow regenerative reserve <output id="reserve-out"></output></span>
+            <input type="range" id="reserve" min="0.4" max="2" step="0.05">
+          </label>
+          <p class="hint">Both multipliers are 1.0 for the reference adult. These are the values the calibration step personalises.</p>
+        </section>
+
+        <section class="panel">
+          <h2>Calibrate from chip data</h2>
+          <p class="hint">Load measurements relative to unexposed control as <code>day,target,value</code>. Targets: <code>hsc</code>, <code>progenitor:neutrophil</code>, <code>progenitor:platelet</code>, <code>progenitor:rbc</code>, <code>progenitor:lymphocyte</code>, or a blood count (<code>neutrophil</code>, <code>platelet</code>, <code>rbc</code>, <code>lymphocyte</code>). The fit uses the exposures set above.</p>
           <div class="btn-row">
-            <button type="button" class="btn btn-small" id="add-acute">+ Acute</button>
-            <button type="button" class="btn btn-small" id="add-chronic">+ Chronic</button>
+            <label class="btn btn-small file-btn">Choose CSV<input type="file" id="csv-file" accept=".csv,text/csv"></label>
+            <button type="button" class="btn btn-small" id="load-example">Load synthetic example</button>
+            <button type="button" class="btn btn-small" id="clear-obs" hidden>Clear data</button>
           </div>
-        </div>
-        <div id="exposure-list" class="exposure-list"></div>
-        <p class="hint">Doses are absorbed dose to active marrow. A duration above 0 spreads the dose evenly; repair between increments lowers the effect.</p>
-      </section>
+          <p class="status-line" id="obs-status" aria-live="polite"></p>
+          <label class="check"><input type="checkbox" id="fit-reserve"> Also fit regenerative reserve</label>
+          <button type="button" class="btn btn-primary" id="fit-btn" disabled>Fit profile to data</button>
+          <div id="fit-result" class="fit-result" hidden></div>
+        </section>
 
-      <section class="panel">
-        <h2>Field geometry</h2>
-        <label class="field range">
-          <span>Marrow in the field <output id="fx-out"></output></span>
-          <input type="range" id="fx" min="0.1" max="1" step="0.05">
-        </label>
-        <label class="field range">
-          <span>Dose to shielded marrow <output id="shield-out"></output></span>
-          <input type="range" id="shield" min="0" max="0.5" step="0.05">
-        </label>
-      </section>
-
-      <section class="panel">
-        <h2>Countermeasures</h2>
-        <div class="iv">
-          <label class="check"><input type="checkbox" id="gcsf-on"> G-CSF (filgrastim-like)</label>
-          <div class="iv-fields">
-            <label class="field mini"><span>Start day</span><input type="number" id="gcsf-start" min="0" step="1"></label>
-            <label class="field mini"><span>Stop day</span><input type="number" id="gcsf-end" min="0" step="1"></label>
+        <details class="panel advanced">
+          <summary><h2>Model parameters</h2></summary>
+          <div class="grid-2">
+            <label class="field mini"><span>HSC α (Gy⁻¹)</span><input type="number" id="p-hsc-alpha" step="0.05" min="0"></label>
+            <label class="field mini"><span>HSC β (Gy⁻²)</span><input type="number" id="p-hsc-beta" step="0.01" min="0"></label>
+            <label class="field mini"><span>HSC regeneration (/day)</span><input type="number" id="p-hsc-regen" step="0.01" min="0.005"></label>
+            <label class="field mini"><span>Repair half-time (h)</span><input type="number" id="p-repair" step="0.25" min="0.1"></label>
+            <label class="field mini"><span>Doomed-cell half-life (d)</span><input type="number" id="p-doomed" step="0.25" min="0.25"></label>
+            <label class="field mini"><span>Neutrophil marrow transit (d)</span><input type="number" id="p-mtt-n" step="0.5" min="1"></label>
           </div>
-        </div>
-        <div class="iv">
-          <label class="check"><input type="checkbox" id="tpo-on"> TPO receptor agonist (romiplostim-like)</label>
-          <div class="iv-fields">
-            <label class="field mini"><span>Start day</span><input type="number" id="tpo-start" min="0" step="1"></label>
-            <label class="field mini"><span>Stop day</span><input type="number" id="tpo-end" min="0" step="1"></label>
+          <button type="button" class="btn btn-small btn-quiet" id="reset-params">Reset to defaults</button>
+        </details>
+      </aside>
+
+      <main class="results" aria-label="Simulation results">
+        <section class="summary" id="summary" aria-live="polite"></section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Exposure and treatment timeline</h2>
+            <p class="card-sub" id="timeline-sub"></p>
           </div>
-        </div>
-        <div class="iv">
-          <label class="check"><input type="checkbox" id="hsct-on"> Stem-cell infusion</label>
-          <div class="iv-fields">
-            <label class="field mini"><span>Day</span><input type="number" id="hsct-day" min="0" step="1"></label>
-            <label class="field mini"><span>Graft (% of normal HSC pool)</span><input type="number" id="hsct-dose" min="0.1" max="50" step="0.5"></label>
+          <div id="timeline" class="chart chart-timeline"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Peripheral blood counts</h2>
+            <p class="card-sub">Shaded band and dashed rules mark CTCAE v5 grade 3 and 4 thresholds. The coloured vertical line is the day shown in the animation. <span id="compare-key" hidden><span class="key-line key-compare"></span> pinned comparison</span></p>
           </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Individual profile</h2>
-        <div class="grid-2">
-          <label class="field mini"><span>ANC ×10⁹/L</span><input type="number" id="b-neutrophil" min="0.5" max="15" step="0.1"></label>
-          <label class="field mini"><span>Platelets ×10⁹/L</span><input type="number" id="b-platelet" min="50" max="600" step="5"></label>
-          <label class="field mini"><span>Hgb g/dL</span><input type="number" id="b-rbc" min="6" max="20" step="0.1"></label>
-          <label class="field mini"><span>ALC ×10⁹/L</span><input type="number" id="b-lymphocyte" min="0.3" max="6" step="0.1"></label>
-        </div>
-        <label class="field range">
-          <span>Radiosensitivity <output id="sens-out"></output></span>
-          <input type="range" id="sens" min="0.4" max="2" step="0.05">
-        </label>
-        <label class="field range">
-          <span>Marrow regenerative reserve <output id="reserve-out"></output></span>
-          <input type="range" id="reserve" min="0.4" max="2" step="0.05">
-        </label>
-        <p class="hint">Both multipliers are 1.0 for the reference adult. These are the values the calibration step personalises.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Calibrate from chip data</h2>
-        <p class="hint">Load measurements relative to unexposed control as <code>day,target,value</code>. Targets: <code>hsc</code>, <code>progenitor:neutrophil</code>, <code>progenitor:platelet</code>, <code>progenitor:rbc</code>, <code>progenitor:lymphocyte</code>, or a blood count (<code>neutrophil</code>, <code>platelet</code>, <code>rbc</code>, <code>lymphocyte</code>). The fit uses the exposures set above.</p>
-        <div class="btn-row">
-          <label class="btn btn-small file-btn">Choose CSV<input type="file" id="csv-file" accept=".csv,text/csv"></label>
-          <button type="button" class="btn btn-small" id="load-example">Load synthetic example</button>
-          <button type="button" class="btn btn-small" id="clear-obs" hidden>Clear data</button>
-        </div>
-        <p class="status-line" id="obs-status" aria-live="polite"></p>
-        <label class="check"><input type="checkbox" id="fit-reserve"> Also fit regenerative reserve</label>
-        <button type="button" class="btn btn-primary" id="fit-btn" disabled>Fit profile to data</button>
-        <div id="fit-result" class="fit-result" hidden></div>
-      </section>
-
-      <details class="panel advanced">
-        <summary><h2>Model parameters</h2></summary>
-        <div class="grid-2">
-          <label class="field mini"><span>HSC α (Gy⁻¹)</span><input type="number" id="p-hsc-alpha" step="0.05" min="0"></label>
-          <label class="field mini"><span>HSC β (Gy⁻²)</span><input type="number" id="p-hsc-beta" step="0.01" min="0"></label>
-          <label class="field mini"><span>HSC regeneration (/day)</span><input type="number" id="p-hsc-regen" step="0.01" min="0.005"></label>
-          <label class="field mini"><span>Repair half-time (h)</span><input type="number" id="p-repair" step="0.25" min="0.1"></label>
-          <label class="field mini"><span>Doomed-cell half-life (d)</span><input type="number" id="p-doomed" step="0.25" min="0.25"></label>
-          <label class="field mini"><span>Neutrophil marrow transit (d)</span><input type="number" id="p-mtt-n" step="0.5" min="1"></label>
-        </div>
-        <button type="button" class="btn btn-small btn-quiet" id="reset-params">Reset to defaults</button>
-      </details>
-    </aside>
-
-    <main class="results" aria-label="Simulation results">
-      <section class="summary" id="summary" aria-live="polite"></section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Exposure and treatment timeline</h2>
-          <p class="card-sub" id="timeline-sub"></p>
-        </div>
-        <div id="timeline" class="chart chart-timeline"></div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Peripheral blood counts</h2>
-          <p class="card-sub">Shaded band and dashed rules mark CTCAE v5 grade 3 and 4 thresholds. <span id="compare-key" hidden><span class="key-line key-compare"></span> pinned comparison</span></p>
-        </div>
-        <div class="blood-grid">
-          <div class="chart" id="chart-neutrophil"></div>
-          <div class="chart" id="chart-platelet"></div>
-          <div class="chart" id="chart-rbc"></div>
-          <div class="chart" id="chart-lymphocyte"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Marrow compartments</h2>
-          <p class="card-sub">Percent of the pre-exposure pool, log scale. Points are loaded observations.</p>
-        </div>
-        <div class="legend" id="marrow-legend"></div>
-        <div class="chart chart-tall" id="chart-marrow"></div>
-      </section>
-
-      <section class="card">
-        <div class="card-head row">
-          <h2>Data table</h2>
-          <div class="btn-row">
-            <button type="button" class="btn btn-small" id="toggle-table" aria-expanded="false">Show table</button>
-            <button type="button" class="btn btn-small" id="copy-csv">Copy CSV</button>
+          <div class="blood-grid">
+            <div class="chart" id="chart-neutrophil"></div>
+            <div class="chart" id="chart-platelet"></div>
+            <div class="chart" id="chart-rbc"></div>
+            <div class="chart" id="chart-lymphocyte"></div>
           </div>
-        </div>
-        <p class="status-line" id="copy-status" aria-live="polite"></p>
-        <div class="table-wrap" id="table-wrap" hidden></div>
-      </section>
+        </section>
 
-      <section class="card notes">
-        <h2>What this model is and is not</h2>
-        <p>Each lineage follows a stem cell → progenitor → three maturation stages → blood chain with feedback from the circulating count, after the Friberg myelosuppression model. Radiation kills dividing marrow cells and circulating lymphocytes by the linear-quadratic model with repair of sublethal damage, so fractionation and low dose rate are less damaging than the same dose given at once. Shielded marrow is simulated as a separate site that keeps producing cells.</p>
-        <p>It does not model mortality, infection, bleeding, transfusion, gastrointestinal or cutaneous injury, the early neutrophil rise from demargination, or long-term stem-cell exhaustion and clonal effects. Space-radiation quality (high-LET ions) is not represented beyond absorbed dose. Treat outputs as hypotheses for experiments, not clinical guidance.</p>
-      </section>
-    </main>
-  </div>
+        <section class="card">
+          <div class="card-head">
+            <h2>Marrow compartments</h2>
+            <p class="card-sub">Percent of the pre-exposure pool, log scale. Points are loaded observations.</p>
+          </div>
+          <div class="legend" id="marrow-legend"></div>
+          <div class="chart chart-tall" id="chart-marrow"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head row">
+            <h2>Data table</h2>
+            <div class="btn-row">
+              <button type="button" class="btn btn-small" id="toggle-table" aria-expanded="false">Show table</button>
+              <button type="button" class="btn btn-small" id="copy-csv">Copy CSV</button>
+            </div>
+          </div>
+          <p class="status-line" id="copy-status" aria-live="polite"></p>
+          <div class="table-wrap" id="table-wrap" hidden></div>
+        </section>
+      </main>
+    </div>
+  </details>
+
+  <footer class="notes">
+    <h2>About this simulation</h2>
+    <p>The animation is driven by a mathematical model of blood production: stem cells feed growing cells, which mature over days and enter the blood, and the marrow speeds up when counts are low. Radiation kills dividing cells, but cells repair some damage when the dose is spread out. Each dot on screen stands for a share of the real population, so fewer dots means fewer cells.</p>
+    <p>This is a research and teaching tool, not medical advice. It leaves out infection, bleeding, transfusions, injury to other organs, and the special effects of heavy particles in space radiation. It is a first step toward a personal “digital twin” that would be tuned with each person’s own marrow cells grown on a tissue chip.</p>
+  </footer>
   <div class="tooltip" id="tooltip" role="status" hidden></div>
 </div>
 <!-- BUILD:BODY-END -->

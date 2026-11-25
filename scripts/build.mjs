@@ -15,7 +15,7 @@ const between = (s, a, b) => {
 };
 
 // Modules in dependency order. Strip ESM syntax so they share one module scope.
-const js = ['src/model.js', 'src/charts.js', 'src/app.js']
+const js = ['src/model.js', 'src/charts.js', 'src/scene.js', 'src/story.js', 'src/app.js']
   .map((p) => `// ---- ${p} ----\n` + read(p)
     .replace(/^import[\s\S]*?from\s+['"][^'"]+['"];\s*$/gm, '')
     .replace(/^export\s+(?=(const|function|let|class|async))/gm, ''))

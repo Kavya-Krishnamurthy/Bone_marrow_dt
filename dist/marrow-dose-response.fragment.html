@@ -1,40 +1,39 @@
-<title>Marrow Dose Response</title>
+<title>Marrow Under Radiation</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: instrument-panel sidebar of inputs beside a scrolling column of readouts and charts. */
+/* Layout: a large illustrated marrow "stage" with a story column, then numbered steps of plain controls, then an expert drawer. */
 :root {
-  /* Neutrals lean slightly blue, like a lab bench under fluorescent light. */
-  --bg: #f4f6f8;
+  --bg: #f5f3f7;
   --surface: #ffffff;
-  --surface-2: #eef1f5;
-  --ink: #16202b;
-  --ink-2: #5a6674;
-  --rule: #dfe4ea;
-  --rule-strong: #c3cbd4;
-  --accent: #9b2335; /* marrow crimson: dose and primary actions only */
+  --surface-2: #efecf3;
+  --ink: #1f1a2b;
+  --ink-2: #5f5870;
+  --rule: #e2dde9;
+  --rule-strong: #c9c1d4;
+  --accent: #6a3fc1; /* stem-cell violet: actions, the current day */
   --accent-ink: #ffffff;
-  --accent-wash: rgba(155, 35, 53, 0.09);
+  --accent-wash: rgba(106, 63, 193, 0.09);
+  --zap: #b9d82a; /* radiation */
+  --zap-ink: #3b4700;
   --focus: #257de0;
 
-  /* Chart roles (dataviz reference palette, light steps) */
   --series-1: #257de0;
   --series-2: #f47230;
   --series-3: #00b894;
   --series-4: #f2a600;
   --series-5: #ee7fac;
   --compare: #8a95a3;
-  --grid: #e7eaee;
-  --axis: #c2c8cf;
+  --grid: #ebe7ef;
+  --axis: #c7c0cf;
   --band-g4: rgba(220, 60, 61, 0.08);
   --band-g3: rgba(241, 138, 89, 0.07);
   --iv-gcsf: #00b894;
   --iv-tpo: #f2a600;
   --iv-hsct: #6a4ce2;
 
-  /* Status (CTCAE grade pills) */
   --g0: #0aac23;
   --g1: #7a8a1e;
   --g2: #fbb315;
@@ -42,29 +41,38 @@
   --g4: #dc3c3d;
   --pill-ink-dark: #0b0b0b;
 
-  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: #e3dde9;
+  --field: rgba(185, 216, 42, 0.55);
+  --field-edge: #7d9410;
+  --shield: #b3a9c2;
+  --marrow-spot: #c8394a;
+  --scene-frame: #d9cfc1;
+
+  --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  --radius: 6px;
+  --radius: 10px;
   --step--1: 0.8125rem;
-  --step-0: 0.9375rem;
-  --step-1: 1.125rem;
-  --step-2: 1.5rem;
-  --step-3: 2.25rem;
+  --step-0: 1rem;
+  --step-1: 1.1875rem;
+  --step-2: 1.625rem;
+  --step-3: clamp(2.25rem, 5vw, 3.5rem);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1419;
-    --surface: #171d24;
-    --surface-2: #1f2730;
-    --ink: #e8edf2;
-    --ink-2: #9aa6b3;
-    --rule: #2a333d;
-    --rule-strong: #3a4550;
-    --accent: #e0637a;
-    --accent-ink: #12090b;
-    --accent-wash: rgba(224, 99, 122, 0.14);
+    --bg: #14111b;
+    --surface: #1d1926;
+    --surface-2: #272232;
+    --ink: #eeeaf4;
+    --ink-2: #a79fb5;
+    --rule: #2f2a3a;
+    --rule-strong: #463f53;
+    --accent: #a98af0;
+    --accent-ink: #160f24;
+    --accent-wash: rgba(169, 138, 240, 0.14);
+    --zap: #c9e64a;
+    --zap-ink: #1c2200;
     --focus: #6aabf1;
     --series-1: #338ced;
     --series-2: #e76624;
@@ -72,28 +80,36 @@
     --series-4: #d28e05;
     --series-5: #e24d8b;
     --compare: #7b8794;
-    --grid: #252d36;
-    --axis: #44505c;
+    --grid: #2a2534;
+    --axis: #4a4357;
     --band-g4: rgba(220, 60, 61, 0.14);
     --band-g3: rgba(241, 138, 89, 0.1);
     --iv-gcsf: #00a888;
     --iv-tpo: #d28e05;
     --iv-hsct: #9887ef;
     --g1: #a8b84a;
+    --body: #3a3346;
+    --field: rgba(201, 230, 74, 0.45);
+    --field-edge: #c9e64a;
+    --shield: #5d546b;
+    --marrow-spot: #f06a78;
+    --scene-frame: #3d3546;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0f1419;
-  --surface: #171d24;
-  --surface-2: #1f2730;
-  --ink: #e8edf2;
-  --ink-2: #9aa6b3;
-  --rule: #2a333d;
-  --rule-strong: #3a4550;
-  --accent: #e0637a;
-  --accent-ink: #12090b;
-  --accent-wash: rgba(224, 99, 122, 0.14);
+  --bg: #14111b;
+  --surface: #1d1926;
+  --surface-2: #272232;
+  --ink: #eeeaf4;
+  --ink-2: #a79fb5;
+  --rule: #2f2a3a;
+  --rule-strong: #463f53;
+  --accent: #a98af0;
+  --accent-ink: #160f24;
+  --accent-wash: rgba(169, 138, 240, 0.14);
+  --zap: #c9e64a;
+  --zap-ink: #1c2200;
   --focus: #6aabf1;
   --series-1: #338ced;
   --series-2: #e76624;
@@ -101,18 +117,25 @@
   --series-4: #d28e05;
   --series-5: #e24d8b;
   --compare: #7b8794;
-  --grid: #252d36;
-  --axis: #44505c;
+  --grid: #2a2534;
+  --axis: #4a4357;
   --band-g4: rgba(220, 60, 61, 0.14);
   --band-g3: rgba(241, 138, 89, 0.1);
   --iv-gcsf: #00a888;
   --iv-tpo: #d28e05;
   --iv-hsct: #9887ef;
   --g1: #a8b84a;
+  --body: #3a3346;
+  --field: rgba(201, 230, 74, 0.45);
+  --field-edge: #c9e64a;
+  --shield: #5d546b;
+  --marrow-spot: #f06a78;
+  --scene-frame: #3d3546;
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; }
 body {
   background: var(--bg);
@@ -123,43 +146,339 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .app {
-  max-width: 1440px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding-block: 24px 48px;
+  padding-block: 28px 56px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 28px;
 }
-h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
-h1 { font-size: var(--step-3); font-weight: 600; line-height: 1.05; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: var(--step-3); font-weight: 800; line-height: 0.98; letter-spacing: -0.02em; }
 h2 { font-size: var(--step-1); font-weight: 600; }
+h3 { font-size: 1.0625rem; font-weight: 600; }
 p { margin: 0; }
 code { font-family: var(--font-data); font-size: 0.86em; background: var(--surface-2); padding: 0 4px; border-radius: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-.masthead {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--rule);
-  margin-bottom: 20px;
-}
-.masthead-text { display: grid; gap: 8px; max-width: 68ch; }
-.eyebrow { font-family: var(--font-data); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
-.lede { color: var(--ink-2); }
-.masthead-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Hero */
+.hero { display: grid; gap: 10px; max-width: 70ch; }
+.eyebrow { font-family: var(--font-data); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); }
+.lede { color: var(--ink-2); font-size: 1.0625rem; }
 
-.layout {
+/* Stage */
+.stage {
   display: grid;
-  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
   gap: 20px;
   align-items: start;
 }
-@media (max-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
-  .controls { order: 2; }
+@media (max-width: 960px) { .stage { grid-template-columns: minmax(0, 1fr); } }
+.scene-col { display: grid; gap: 12px; min-width: 0; }
+.scene-frame {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 3px solid var(--scene-frame);
+  background: #f2c5bf;
+  box-shadow: 0 10px 30px rgba(60, 30, 60, 0.12);
 }
+.scene-frame canvas { display: block; width: 100%; cursor: crosshair; touch-action: pan-y; }
+.scene-labels { position: absolute; inset: 0; pointer-events: none; }
+.scene-label {
+  position: absolute;
+  display: grid;
+  gap: 0;
+  padding: 5px 9px 6px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #24192c;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(60, 20, 50, 0.15);
+  line-height: 1.2;
+  max-width: 200px;
+}
+.scene-label strong { font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+.scene-label span { font-size: 12.5px; color: #5c4f63; }
+.scene-label em { font-style: normal; font-family: var(--font-data); font-size: 11.5px; color: #5a2fae; }
+.scene-label em:empty { display: none; }
+.scene-labels.compact .scene-label { padding: 3px 6px; }
+.scene-labels.compact .scene-label span { display: none; }
+.scene-labels.compact .scene-label strong { font-size: 12px; }
+.scene-labels.compact .scene-label em { font-size: 10px; }
+.scene-badge {
+  position: absolute;
+  right: 12px;
+  bottom: 14px;
+  background: rgba(31, 20, 40, 0.82);
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 12px 7px;
+  display: grid;
+  justify-items: end;
+  line-height: 1.05;
+  pointer-events: none;
+}
+.badge-day { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.1rem, 3vw, 1.75rem); }
+.badge-sub { font-size: 12px; opacity: 0.8; }
+@media (max-width: 620px) {
+  .scene-badge { right: 8px; bottom: 8px; padding: 3px 8px 4px; }
+  .badge-sub { display: none; }
+  .scene-toggle { font-size: 11px; padding: 2px 8px; }
+}
+.scene-toggle {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  font: inherit;
+  font-size: 12.5px;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #2b1d36;
+  cursor: pointer;
+}
+.scene-toggle[aria-pressed="false"] { background: rgba(31, 20, 40, 0.72); color: #fff; }
+
+.player { display: flex; align-items: center; gap: 14px; }
+.play-btn {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(106, 63, 193, 0.35);
+}
+.play-btn:hover { filter: brightness(1.08); }
+.track { position: relative; flex: 1; min-width: 0; padding-top: 18px; }
+.track input[type="range"] { width: 100%; margin: 0; accent-color: var(--accent); }
+.track-marks { position: absolute; left: 0; right: 0; top: 0; height: 18px; }
+.track-mark {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--surface);
+}
+.track-mark.zap { background: var(--zap); }
+.track-mark.rx { background: var(--iv-gcsf); border-radius: 3px; }
+.track-mark.low { background: var(--g4); width: 10px; height: 10px; top: 4px; }
+.track-mark.up { background: var(--g0); width: 10px; height: 10px; top: 4px; }
+.track-band { position: absolute; top: 7px; height: 4px; background: var(--zap); border-radius: 2px; opacity: 0.7; }
+.track-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); font-family: var(--font-data); }
+.speed select { font: inherit; font-size: var(--step--1); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rule-strong); background: var(--surface); color: var(--ink); }
+
+.moments { display: flex; flex-wrap: wrap; gap: 6px; }
+.moment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: var(--step--1);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.moment:hover { background: var(--surface-2); }
+.moment b { font-family: var(--font-data); font-weight: 500; color: var(--ink-2); }
+.moment i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.moment i.zap { background: var(--zap); }
+.moment i.low { background: var(--g4); }
+.moment i.up { background: var(--g0); }
+.moment i.rx { background: var(--iv-gcsf); border-radius: 2px; }
+
+.cell-legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 6px; }
+.cell-chip {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 10px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  cursor: help;
+}
+.cell-chip:hover, .cell-chip:focus-visible { border-color: var(--accent); background: var(--accent-wash); }
+.cell-chip canvas { border-radius: 50%; background: #f6d3cd; }
+.cell-chip strong { display: block; font-size: 13.5px; line-height: 1.15; }
+.cell-chip span { font-family: var(--font-data); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+
+/* Readout */
+.readout { display: grid; gap: 14px; min-width: 0; }
+.story {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: grid;
+  gap: 6px;
+  min-height: 190px;
+  align-content: start;
+}
+.story-day { font-family: var(--font-data); font-size: var(--step--1); color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+.story h2 { font-size: var(--step-2); font-weight: 800; line-height: 1.08; letter-spacing: -0.01em; }
+.story p:last-child { color: var(--ink-2); }
+
+.meters { display: grid; gap: 8px; }
+.meter {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 10px 14px 12px;
+  display: grid;
+  gap: 6px;
+}
+.meter-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.meter-name strong { display: block; font-family: var(--font-display); font-size: 15.5px; font-weight: 600; line-height: 1.1; }
+.meter-name small { color: var(--ink-2); font-size: 12px; }
+.meter-status { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.meter-status .ico { width: 16px; height: 16px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; color: #fff; font-family: var(--font-data); }
+.meter-bar { position: relative; height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.meter-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; transition: width 0.15s linear, background-color 0.3s; }
+.meter-tick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--surface); }
+.meter-foot { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); font-family: var(--font-data); }
+
+.body-fig {
+  margin: 0;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.body-fig svg { width: 96px; height: auto; display: block; }
+.body-fig figcaption { display: grid; gap: 4px; font-size: 12.5px; color: var(--ink-2); }
+.body-fig figcaption strong { font-family: var(--font-display); font-size: 15px; color: var(--ink); }
+#body-caption { color: var(--ink); }
+.fig-key { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; }
+.fig-key i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.k-field { background: var(--field); border: 1px solid var(--field-edge); }
+.k-shield { background: repeating-linear-gradient(45deg, var(--shield) 0 2px, transparent 2px 5px); border: 1px solid var(--shield); margin-left: 8px; }
+.field-pulse { animation: fieldpulse 0.9s ease-out; }
+@keyframes fieldpulse { 0% { fill: rgba(230, 255, 90, 0.95); } 100% { fill: var(--field); } }
+
+/* Steps */
+.step { display: grid; gap: 14px; }
+.step-head { display: flex; align-items: center; gap: 12px; }
+.step-num {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.step-head h2 { font-size: var(--step-2); font-weight: 800; }
+
+.scenario-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.scard {
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--surface);
+  border: 2px solid var(--rule);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.scard:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
+.scard[aria-checked="true"] { border-color: var(--accent); background: var(--accent-wash); }
+.scard svg { width: 44px; height: 44px; }
+.scard strong { font-family: var(--font-display); font-size: 16px; font-weight: 600; line-height: 1.15; }
+.scard small { color: var(--ink-2); font-size: 13px; line-height: 1.35; }
+.scard .tag { font-family: var(--font-data); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); }
+
+.knobs { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.knob {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+}
+.knob-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.big-value { font-family: var(--font-display); font-weight: 800; font-size: var(--step-2); line-height: 1; }
+.knob-say { font-size: 14px; }
+.knob-note { font-size: 12.5px; color: var(--ink-2); }
+.knob input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; }
+.dose-scale { position: relative; height: 54px; font-size: 11px; color: var(--ink-2); }
+.dose-tick { position: absolute; top: 0; transform: translateX(-50%); display: grid; justify-items: center; line-height: 1.1; text-align: center; white-space: nowrap; }
+.dose-tick::before { content: ""; width: 1px; height: 6px; background: var(--rule-strong); margin-bottom: 2px; }
+.dose-tick.row2 { top: 22px; }
+.dose-tick.row2::before { height: 26px; margin-top: -20px; }
+.dose-tick.edge-l { transform: none; justify-items: start; text-align: left; }
+.dose-tick.edge-r { transform: translateX(-100%); justify-items: end; text-align: right; }
+.seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.seg-wrap { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.seg button {
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+}
+.seg button[aria-checked="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.sub-knob { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 14px; align-items: baseline; }
+.sub-knob input { grid-column: 1 / -1; }
+.sub-knob output { font-family: var(--font-data); font-size: 13px; color: var(--accent); }
+.rx-list { display: grid; gap: 8px; }
+.rx { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; cursor: pointer; padding: 8px; border-radius: 8px; border: 1px solid var(--rule); }
+.rx:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
+.rx input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); }
+.rx strong { display: block; font-size: 14.5px; }
+.rx small { color: var(--ink-2); font-size: 12.5px; line-height: 1.35; display: block; }
+
+/* Expert drawer */
+.expert { background: var(--surface-2); border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; }
+.expert > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+.expert > summary::-webkit-details-marker { display: none; }
+.expert > summary strong { font-family: var(--font-display); font-size: var(--step-1); display: block; }
+.expert > summary small { color: var(--ink-2); font-size: 13.5px; }
+.expert > summary::after { content: "Open ▾"; margin-left: auto; font-size: 13px; color: var(--accent); white-space: nowrap; }
+.expert[open] > summary::after { content: "Close ▴"; }
+.expert[open] > summary { margin-bottom: 14px; }
+.expert-actions { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 960px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.panel, .card, .verdict, .tile { border-radius: 8px; }
 
 /* Controls */
 .controls { display: grid; gap: 12px; min-width: 0; }
@@ -347,8 +666,10 @@ input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px;
   padding: 8px 10px;
   font-size: var(--step--1);
   min-width: 160px;
-  max-width: 260px;
+  max-width: 290px;
 }
+.tooltip .tt-title { font-family: var(--font-display); font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+.tooltip .tt-text { color: var(--ink-2); margin-bottom: 4px; line-height: 1.4; }
 .tooltip .tt-head { font-family: var(--font-data); color: var(--ink-2); margin-bottom: 4px; }
 .tooltip .tt-row { display: grid; grid-template-columns: 14px 1fr auto; gap: 6px; align-items: center; }
 .tooltip .tt-key { width: 12px; border-top: 2px solid; }
@@ -362,7 +683,8 @@ th, td { padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--ru
 th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; color: var(--ink-2); }
 td { font-family: var(--font-data); }
 
-.notes p { color: var(--ink-2); max-width: 75ch; font-size: var(--step--1); }
+.notes { display: grid; gap: 8px; border-top: 1px solid var(--rule); padding-top: 20px; }
+.notes p { color: var(--ink-2); max-width: 75ch; font-size: 14px; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
@@ -370,188 +692,353 @@ td { font-family: var(--font-data); }
 
 </style>
 <div class="app">
-  <header class="masthead">
-    <div class="masthead-text">
-      <p class="eyebrow">Hematopoietic radiation response · preliminary digital twin</p>
-      <h1>Marrow Dose Response</h1>
-      <p class="lede">Set an exposure, a person and any countermeasures. The model projects stem cells, marrow progenitors and blood counts day by day, using literature-informed parameters that you can calibrate against tissue-chip data.</p>
+  <header class="hero">
+    <p class="eyebrow">A look inside the body’s blood factory</p>
+    <h1>Marrow Under Radiation</h1>
+    <p class="lede">Bone marrow makes hundreds of billions of new blood cells every day. Pick a situation, press play, and watch what radiation does to that factory, how long it takes to recover, and which treatments help.</p>
+  </header>
+
+  <section class="stage" aria-label="Animated bone marrow">
+    <div class="scene-col">
+      <div class="scene-frame">
+        <canvas id="scene" aria-label="Illustration of bone marrow: bone at the top and bottom, stem cells near the bone, young blood cells and fat cells in the middle, and a blood vessel carrying finished cells." role="img"></canvas>
+        <div class="scene-labels" id="scene-labels"></div>
+        <div class="scene-badge" id="scene-badge">
+          <span class="badge-day" id="badge-day">Before</span>
+          <span class="badge-sub" id="badge-sub">exposure</span>
+        </div>
+        <button type="button" class="scene-toggle" id="labels-toggle" aria-pressed="true">Labels on</button>
+      </div>
+
+      <div class="player">
+        <button type="button" class="play-btn" id="play" aria-label="Play">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path id="play-icon" d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>
+        </button>
+        <div class="track">
+          <div class="track-marks" id="track-marks" aria-hidden="true"></div>
+          <input type="range" id="day-slider" aria-label="Day">
+          <div class="track-ends"><span>Before</span><span id="track-end"></span></div>
+        </div>
+        <label class="speed"><span class="sr-only">Playback speed</span>
+          <select id="speed">
+            <option value="0.5">Slow</option>
+            <option value="1" selected>Normal</option>
+            <option value="2">Fast</option>
+          </select>
+        </label>
+      </div>
+      <div class="moments" id="moments" aria-label="Key moments"></div>
+
+      <div class="cell-legend" id="cell-legend" aria-label="Cell types"></div>
     </div>
-    <div class="masthead-actions">
+
+    <aside class="readout">
+      <div class="story" aria-live="polite">
+        <p class="story-day" id="story-day"></p>
+        <h2 id="story-title"></h2>
+        <p id="story-body"></p>
+      </div>
+      <div class="meters" id="meters"></div>
+      <figure class="body-fig">
+        <svg viewBox="0 0 140 250" id="body-svg" aria-labelledby="body-caption" role="img">
+          <defs>
+            <clipPath id="body-clip">
+              <circle cx="70" cy="24" r="17"/>
+              <rect x="62" y="38" width="16" height="10" rx="3"/>
+              <path d="M40 50 Q70 42 100 50 L104 128 Q70 138 36 128 Z"/>
+              <rect x="20" y="52" width="16" height="78" rx="8" transform="rotate(8 28 52)"/>
+              <rect x="104" y="52" width="16" height="78" rx="8" transform="rotate(-8 112 52)"/>
+              <rect x="40" y="126" width="26" height="118" rx="11"/>
+              <rect x="74" y="126" width="26" height="118" rx="11"/>
+            </clipPath>
+            <pattern id="shield-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="6" stroke="var(--shield)" stroke-width="2"/>
+            </pattern>
+          </defs>
+          <g clip-path="url(#body-clip)">
+            <rect x="0" y="0" width="140" height="250" fill="var(--body)"/>
+            <rect id="field-rect" x="0" y="0" width="140" height="250" fill="var(--field)"/>
+            <rect id="shield-rect" x="0" y="250" width="140" height="0" fill="url(#shield-hatch)"/>
+          </g>
+          <g class="marrow-spots" fill="var(--marrow-spot)">
+            <ellipse cx="70" cy="16" rx="9" ry="5"/>
+            <rect x="67" y="54" width="6" height="30" rx="3"/>
+            <rect x="68" y="86" width="4" height="36" rx="2"/>
+            <path d="M48 62 Q58 58 64 62 M48 72 Q58 68 64 72 M76 62 Q82 58 92 62 M76 72 Q82 68 92 72" stroke="var(--marrow-spot)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <ellipse cx="70" cy="124" rx="24" ry="8"/>
+            <rect x="48" y="134" width="9" height="26" rx="4"/>
+            <rect x="83" y="134" width="9" height="26" rx="4"/>
+            <rect x="26" y="58" width="7" height="16" rx="3" transform="rotate(8 28 58)"/>
+            <rect x="107" y="58" width="7" height="16" rx="3" transform="rotate(-8 112 58)"/>
+          </g>
+          <line id="field-edge" x1="4" x2="136" y1="250" y2="250" stroke="var(--field-edge)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        </svg>
+        <figcaption>
+          <strong>Where marrow is</strong>
+          <span>Red spots mark the bones that hold most adult marrow: skull, breastbone, ribs, spine, hips and the tops of the long bones.</span>
+          <span id="body-caption"></span>
+          <span class="fig-key"><i class="k-field"></i> in the radiation field <i class="k-shield"></i> shielded</span>
+        </figcaption>
+      </figure>
+    </aside>
+  </section>
+
+  <section class="step" aria-labelledby="step1">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">1</span>
+      <h2 id="step1">What happened?</h2>
+    </div>
+    <div class="scenario-cards" id="scenario-cards" role="radiogroup" aria-label="Scenario"></div>
+  </section>
+
+  <section class="step" aria-labelledby="step2">
+    <div class="step-head">
+      <span class="step-num" aria-hidden="true">2</span>
+      <h2 id="step2">Change the details</h2>
+    </div>
+    <div class="knobs">
+      <div class="knob knob-dose">
+        <div class="knob-top">
+          <h3>How much radiation</h3>
+          <output class="big-value" id="dose-out"></output>
+        </div>
+        <input type="range" id="dose-slider" min="0" max="1000" step="1" aria-label="Radiation dose to the marrow">
+        <div class="dose-scale" id="dose-scale" aria-hidden="true"></div>
+        <p class="knob-say" id="dose-say"></p>
+        <p class="knob-note">Gy (gray) measures energy absorbed by the marrow. 1 Gy is 1,000 mGy.</p>
+      </div>
+
+      <div class="knob">
+        <h3>How it arrived</h3>
+        <div class="seg" id="mode-seg" role="radiogroup" aria-label="Delivery">
+          <button type="button" role="radio" data-mode="instant">All at once</button>
+          <button type="button" role="radio" data-mode="hours">Over hours</button>
+          <button type="button" role="radio" data-mode="split">In sessions</button>
+          <button type="button" role="radio" data-mode="daily">A little every day</button>
+        </div>
+        <label class="sub-knob" id="mode-sub"><span id="mode-sub-label"></span><output id="mode-sub-out"></output><input type="range" id="mode-sub-range"></label>
+        <p class="knob-say" id="mode-say"></p>
+      </div>
+
+      <div class="knob">
+        <div class="knob-top">
+          <h3>How much of the body</h3>
+          <output class="big-value" id="fx-big"></output>
+        </div>
+        <input type="range" id="fx-simple" min="0.1" max="1" step="0.05" aria-label="Share of marrow in the radiation field">
+        <p class="knob-say" id="fx-say"></p>
+      </div>
+
+      <div class="knob">
+        <h3>Treatment</h3>
+        <div class="rx-list">
+          <label class="rx"><input type="checkbox" id="rx-gcsf"><span><strong>White-cell booster</strong><small>G-CSF shots that push the marrow to make infection fighters faster.</small></span></label>
+          <label class="rx"><input type="checkbox" id="rx-tpo"><span><strong>Platelet booster</strong><small>A TPO-like drug that helps megakaryocytes and stem cells.</small></span></label>
+          <label class="rx"><input type="checkbox" id="rx-hsct"><span><strong>Stem-cell transplant</strong><small>Donor stem cells infused to rebuild a destroyed marrow.</small></span></label>
+        </div>
+      </div>
+
+      <div class="knob">
+        <h3>The person</h3>
+        <label class="sub-knob"><span>Sensitivity to radiation</span><output id="sens-say"></output><input type="range" id="sens-simple" min="0.4" max="2" step="0.05"></label>
+        <label class="sub-knob"><span>Speed of recovery</span><output id="reserve-say"></output><input type="range" id="reserve-simple" min="0.4" max="2" step="0.05"></label>
+        <p class="knob-note">People differ. A digital twin would set these from the person’s own cells grown on a tissue chip.</p>
+      </div>
+
+      <div class="knob">
+        <h3>How long to watch</h3>
+        <div class="seg seg-wrap" id="days-seg" role="radiogroup" aria-label="Time span">
+          <button type="button" role="radio" data-days="30">1 month</button>
+          <button type="button" role="radio" data-days="60">2 months</button>
+          <button type="button" role="radio" data-days="90">3 months</button>
+          <button type="button" role="radio" data-days="180">6 months</button>
+          <button type="button" role="radio" data-days="365">1 year</button>
+          <button type="button" role="radio" data-days="900">2½ years</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <details class="expert" id="expert">
+    <summary>
+      <span class="step-num" aria-hidden="true">3</span>
+      <span><strong>Expert view</strong><small>Charts, exact inputs, model parameters, data table and calibration from tissue-chip data</small></span>
+    </summary>
+    <div class="expert-actions">
       <button type="button" id="pin-btn" class="btn">Pin as comparison</button>
       <button type="button" id="unpin-btn" class="btn btn-quiet" hidden>Clear comparison</button>
     </div>
-  </header>
+    <div class="layout">
+      <aside class="controls" aria-label="Simulation inputs">
+        <section class="panel">
+          <h2>Scenario</h2>
+          <label class="field">
+            <span>Preset</span>
+            <select id="scenario"></select>
+          </label>
+          <p class="hint" id="scenario-note"></p>
+          <label class="field">
+            <span>Time horizon</span>
+            <select id="days">
+              <option value="30">30 days</option>
+              <option value="60">60 days</option>
+              <option value="90">90 days</option>
+              <option value="180">180 days</option>
+              <option value="365">1 year</option>
+              <option value="900">900 days</option>
+            </select>
+          </label>
+        </section>
 
-  <div class="layout">
-    <aside class="controls" aria-label="Simulation inputs">
-      <section class="panel">
-        <h2>Scenario</h2>
-        <label class="field">
-          <span>Preset</span>
-          <select id="scenario"></select>
-        </label>
-        <p class="hint" id="scenario-note"></p>
-        <label class="field">
-          <span>Time horizon</span>
-          <select id="days">
-            <option value="30">30 days</option>
-            <option value="60">60 days</option>
-            <option value="90">90 days</option>
-            <option value="180">180 days</option>
-            <option value="365">1 year</option>
-            <option value="900">900 days</option>
-          </select>
-        </label>
-      </section>
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Exposures</h2>
+            <div class="btn-row">
+              <button type="button" class="btn btn-small" id="add-acute">+ Acute</button>
+              <button type="button" class="btn btn-small" id="add-chronic">+ Chronic</button>
+            </div>
+          </div>
+          <div id="exposure-list" class="exposure-list"></div>
+          <p class="hint">Doses are absorbed dose to active marrow. A duration above 0 spreads the dose evenly; repair between increments lowers the effect.</p>
+        </section>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Exposures</h2>
+        <section class="panel">
+          <h2>Field geometry</h2>
+          <label class="field range">
+            <span>Marrow in the field <output id="fx-out"></output></span>
+            <input type="range" id="fx" min="0.1" max="1" step="0.05">
+          </label>
+          <label class="field range">
+            <span>Dose to shielded marrow <output id="shield-out"></output></span>
+            <input type="range" id="shield" min="0" max="0.5" step="0.05">
+          </label>
+        </section>
+
+        <section class="panel">
+          <h2>Countermeasures</h2>
+          <div class="iv">
+            <label class="check"><input type="checkbox" id="gcsf-on"> G-CSF (filgrastim-like)</label>
+            <div class="iv-fields">
+              <label class="field mini"><span>Start day</span><input type="number" id="gcsf-start" min="0" step="1"></label>
+              <label class="field mini"><span>Stop day</span><input type="number" id="gcsf-end" min="0" step="1"></label>
+            </div>
+          </div>
+          <div class="iv">
+            <label class="check"><input type="checkbox" id="tpo-on"> TPO receptor agonist (romiplostim-like)</label>
+            <div class="iv-fields">
+              <label class="field mini"><span>Start day</span><input type="number" id="tpo-start" min="0" step="1"></label>
+              <label class="field mini"><span>Stop day</span><input type="number" id="tpo-end" min="0" step="1"></label>
+            </div>
+          </div>
+          <div class="iv">
+            <label class="check"><input type="checkbox" id="hsct-on"> Stem-cell infusion</label>
+            <div class="iv-fields">
+              <label class="field mini"><span>Day</span><input type="number" id="hsct-day" min="0" step="1"></label>
+              <label class="field mini"><span>Graft (% of normal HSC pool)</span><input type="number" id="hsct-dose" min="0.1" max="50" step="0.5"></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Individual profile</h2>
+          <div class="grid-2">
+            <label class="field mini"><span>ANC ×10⁹/L</span><input type="number" id="b-neutrophil" min="0.5" max="15" step="0.1"></label>
+            <label class="field mini"><span>Platelets ×10⁹/L</span><input type="number" id="b-platelet" min="50" max="600" step="5"></label>
+            <label class="field mini"><span>Hgb g/dL</span><input type="number" id="b-rbc" min="6" max="20" step="0.1"></label>
+            <label class="field mini"><span>ALC ×10⁹/L</span><input type="number" id="b-lymphocyte" min="0.3" max="6" step="0.1"></label>
+          </div>
+          <label class="field range">
+            <span>Radiosensitivity <output id="sens-out"></output></span>
+            <input type="range" id="sens" min="0.4" max="2" step="0.05">
+          </label>
+          <label class="field range">
+            <span>Marrow regenerative reserve <output id="reserve-out"></output></span>
+            <input type="range" id="reserve" min="0.4" max="2" step="0.05">
+          </label>
+          <p class="hint">Both multipliers are 1.0 for the reference adult. These are the values the calibration step personalises.</p>
+        </section>
+
+        <section class="panel">
+          <h2>Calibrate from chip data</h2>
+          <p class="hint">Load measurements relative to unexposed control as <code>day,target,value</code>. Targets: <code>hsc</code>, <code>progenitor:neutrophil</code>, <code>progenitor:platelet</code>, <code>progenitor:rbc</code>, <code>progenitor:lymphocyte</code>, or a blood count (<code>neutrophil</code>, <code>platelet</code>, <code>rbc</code>, <code>lymphocyte</code>). The fit uses the exposures set above.</p>
           <div class="btn-row">
-            <button type="button" class="btn btn-small" id="add-acute">+ Acute</button>
-            <button type="button" class="btn btn-small" id="add-chronic">+ Chronic</button>
+            <label class="btn btn-small file-btn">Choose CSV<input type="file" id="csv-file" accept=".csv,text/csv"></label>
+            <button type="button" class="btn btn-small" id="load-example">Load synthetic example</button>
+            <button type="button" class="btn btn-small" id="clear-obs" hidden>Clear data</button>
           </div>
-        </div>
-        <div id="exposure-list" class="exposure-list"></div>
-        <p class="hint">Doses are absorbed dose to active marrow. A duration above 0 spreads the dose evenly; repair between increments lowers the effect.</p>
-      </section>
+          <p class="status-line" id="obs-status" aria-live="polite"></p>
+          <label class="check"><input type="checkbox" id="fit-reserve"> Also fit regenerative reserve</label>
+          <button type="button" class="btn btn-primary" id="fit-btn" disabled>Fit profile to data</button>
+          <div id="fit-result" class="fit-result" hidden></div>
+        </section>
 
-      <section class="panel">
-        <h2>Field geometry</h2>
-        <label class="field range">
-          <span>Marrow in the field <output id="fx-out"></output></span>
-          <input type="range" id="fx" min="0.1" max="1" step="0.05">
-        </label>
-        <label class="field range">
-          <span>Dose to shielded marrow <output id="shield-out"></output></span>
-          <input type="range" id="shield" min="0" max="0.5" step="0.05">
-        </label>
-      </section>
-
-      <section class="panel">
-        <h2>Countermeasures</h2>
-        <div class="iv">
-          <label class="check"><input type="checkbox" id="gcsf-on"> G-CSF (filgrastim-like)</label>
-          <div class="iv-fields">
-            <label class="field mini"><span>Start day</span><input type="number" id="gcsf-start" min="0" step="1"></label>
-            <label class="field mini"><span>Stop day</span><input type="number" id="gcsf-end" min="0" step="1"></label>
+        <details class="panel advanced">
+          <summary><h2>Model parameters</h2></summary>
+          <div class="grid-2">
+            <label class="field mini"><span>HSC α (Gy⁻¹)</span><input type="number" id="p-hsc-alpha" step="0.05" min="0"></label>
+            <label class="field mini"><span>HSC β (Gy⁻²)</span><input type="number" id="p-hsc-beta" step="0.01" min="0"></label>
+            <label class="field mini"><span>HSC regeneration (/day)</span><input type="number" id="p-hsc-regen" step="0.01" min="0.005"></label>
+            <label class="field mini"><span>Repair half-time (h)</span><input type="number" id="p-repair" step="0.25" min="0.1"></label>
+            <label class="field mini"><span>Doomed-cell half-life (d)</span><input type="number" id="p-doomed" step="0.25" min="0.25"></label>
+            <label class="field mini"><span>Neutrophil marrow transit (d)</span><input type="number" id="p-mtt-n" step="0.5" min="1"></label>
           </div>
-        </div>
-        <div class="iv">
-          <label class="check"><input type="checkbox" id="tpo-on"> TPO receptor agonist (romiplostim-like)</label>
-          <div class="iv-fields">
-            <label class="field mini"><span>Start day</span><input type="number" id="tpo-start" min="0" step="1"></label>
-            <label class="field mini"><span>Stop day</span><input type="number" id="tpo-end" min="0" step="1"></label>
+          <button type="button" class="btn btn-small btn-quiet" id="reset-params">Reset to defaults</button>
+        </details>
+      </aside>
+
+      <main class="results" aria-label="Simulation results">
+        <section class="summary" id="summary" aria-live="polite"></section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Exposure and treatment timeline</h2>
+            <p class="card-sub" id="timeline-sub"></p>
           </div>
-        </div>
-        <div class="iv">
-          <label class="check"><input type="checkbox" id="hsct-on"> Stem-cell infusion</label>
-          <div class="iv-fields">
-            <label class="field mini"><span>Day</span><input type="number" id="hsct-day" min="0" step="1"></label>
-            <label class="field mini"><span>Graft (% of normal HSC pool)</span><input type="number" id="hsct-dose" min="0.1" max="50" step="0.5"></label>
+          <div id="timeline" class="chart chart-timeline"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h2>Peripheral blood counts</h2>
+            <p class="card-sub">Shaded band and dashed rules mark CTCAE v5 grade 3 and 4 thresholds. The coloured vertical line is the day shown in the animation. <span id="compare-key" hidden><span class="key-line key-compare"></span> pinned comparison</span></p>
           </div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <h2>Individual profile</h2>
-        <div class="grid-2">
-          <label class="field mini"><span>ANC ×10⁹/L</span><input type="number" id="b-neutrophil" min="0.5" max="15" step="0.1"></label>
-          <label class="field mini"><span>Platelets ×10⁹/L</span><input type="number" id="b-platelet" min="50" max="600" step="5"></label>
-          <label class="field mini"><span>Hgb g/dL</span><input type="number" id="b-rbc" min="6" max="20" step="0.1"></label>
-          <label class="field mini"><span>ALC ×10⁹/L</span><input type="number" id="b-lymphocyte" min="0.3" max="6" step="0.1"></label>
-        </div>
-        <label class="field range">
-          <span>Radiosensitivity <output id="sens-out"></output></span>
-          <input type="range" id="sens" min="0.4" max="2" step="0.05">
-        </label>
-        <label class="field range">
-          <span>Marrow regenerative reserve <output id="reserve-out"></output></span>
-          <input type="range" id="reserve" min="0.4" max="2" step="0.05">
-        </label>
-        <p class="hint">Both multipliers are 1.0 for the reference adult. These are the values the calibration step personalises.</p>
-      </section>
-
-      <section class="panel">
-        <h2>Calibrate from chip data</h2>
-        <p class="hint">Load measurements relative to unexposed control as <code>day,target,value</code>. Targets: <code>hsc</code>, <code>progenitor:neutrophil</code>, <code>progenitor:platelet</code>, <code>progenitor:rbc</code>, <code>progenitor:lymphocyte</code>, or a blood count (<code>neutrophil</code>, <code>platelet</code>, <code>rbc</code>, <code>lymphocyte</code>). The fit uses the exposures set above.</p>
-        <div class="btn-row">
-          <label class="btn btn-small file-btn">Choose CSV<input type="file" id="csv-file" accept=".csv,text/csv"></label>
-          <button type="button" class="btn btn-small" id="load-example">Load synthetic example</button>
-          <button type="button" class="btn btn-small" id="clear-obs" hidden>Clear data</button>
-        </div>
-        <p class="status-line" id="obs-status" aria-live="polite"></p>
-        <label class="check"><input type="checkbox" id="fit-reserve"> Also fit regenerative reserve</label>
-        <button type="button" class="btn btn-primary" id="fit-btn" disabled>Fit profile to data</button>
-        <div id="fit-result" class="fit-result" hidden></div>
-      </section>
-
-      <details class="panel advanced">
-        <summary><h2>Model parameters</h2></summary>
-        <div class="grid-2">
-          <label class="field mini"><span>HSC α (Gy⁻¹)</span><input type="number" id="p-hsc-alpha" step="0.05" min="0"></label>
-          <label class="field mini"><span>HSC β (Gy⁻²)</span><input type="number" id="p-hsc-beta" step="0.01" min="0"></label>
-          <label class="field mini"><span>HSC regeneration (/day)</span><input type="number" id="p-hsc-regen" step="0.01" min="0.005"></label>
-          <label class="field mini"><span>Repair half-time (h)</span><input type="number" id="p-repair" step="0.25" min="0.1"></label>
-          <label class="field mini"><span>Doomed-cell half-life (d)</span><input type="number" id="p-doomed" step="0.25" min="0.25"></label>
-          <label class="field mini"><span>Neutrophil marrow transit (d)</span><input type="number" id="p-mtt-n" step="0.5" min="1"></label>
-        </div>
-        <button type="button" class="btn btn-small btn-quiet" id="reset-params">Reset to defaults</button>
-      </details>
-    </aside>
-
-    <main class="results" aria-label="Simulation results">
-      <section class="summary" id="summary" aria-live="polite"></section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Exposure and treatment timeline</h2>
-          <p class="card-sub" id="timeline-sub"></p>
-        </div>
-        <div id="timeline" class="chart chart-timeline"></div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Peripheral blood counts</h2>
-          <p class="card-sub">Shaded band and dashed rules mark CTCAE v5 grade 3 and 4 thresholds. <span id="compare-key" hidden><span class="key-line key-compare"></span> pinned comparison</span></p>
-        </div>
-        <div class="blood-grid">
-          <div class="chart" id="chart-neutrophil"></div>
-          <div class="chart" id="chart-platelet"></div>
-          <div class="chart" id="chart-rbc"></div>
-          <div class="chart" id="chart-lymphocyte"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head">
-          <h2>Marrow compartments</h2>
-          <p class="card-sub">Percent of the pre-exposure pool, log scale. Points are loaded observations.</p>
-        </div>
-        <div class="legend" id="marrow-legend"></div>
-        <div class="chart chart-tall" id="chart-marrow"></div>
-      </section>
-
-      <section class="card">
-        <div class="card-head row">
-          <h2>Data table</h2>
-          <div class="btn-row">
-            <button type="button" class="btn btn-small" id="toggle-table" aria-expanded="false">Show table</button>
-            <button type="button" class="btn btn-small" id="copy-csv">Copy CSV</button>
+          <div class="blood-grid">
+            <div class="chart" id="chart-neutrophil"></div>
+            <div class="chart" id="chart-platelet"></div>
+            <div class="chart" id="chart-rbc"></div>
+            <div class="chart" id="chart-lymphocyte"></div>
           </div>
-        </div>
-        <p class="status-line" id="copy-status" aria-live="polite"></p>
-        <div class="table-wrap" id="table-wrap" hidden></div>
-      </section>
+        </section>
 
-      <section class="card notes">
-        <h2>What this model is and is not</h2>
-        <p>Each lineage follows a stem cell → progenitor → three maturation stages → blood chain with feedback from the circulating count, after the Friberg myelosuppression model. Radiation kills dividing marrow cells and circulating lymphocytes by the linear-quadratic model with repair of sublethal damage, so fractionation and low dose rate are less damaging than the same dose given at once. Shielded marrow is simulated as a separate site that keeps producing cells.</p>
-        <p>It does not model mortality, infection, bleeding, transfusion, gastrointestinal or cutaneous injury, the early neutrophil rise from demargination, or long-term stem-cell exhaustion and clonal effects. Space-radiation quality (high-LET ions) is not represented beyond absorbed dose. Treat outputs as hypotheses for experiments, not clinical guidance.</p>
-      </section>
-    </main>
-  </div>
+        <section class="card">
+          <div class="card-head">
+            <h2>Marrow compartments</h2>
+            <p class="card-sub">Percent of the pre-exposure pool, log scale. Points are loaded observations.</p>
+          </div>
+          <div class="legend" id="marrow-legend"></div>
+          <div class="chart chart-tall" id="chart-marrow"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head row">
+            <h2>Data table</h2>
+            <div class="btn-row">
+              <button type="button" class="btn btn-small" id="toggle-table" aria-expanded="false">Show table</button>
+              <button type="button" class="btn btn-small" id="copy-csv">Copy CSV</button>
+            </div>
+          </div>
+          <p class="status-line" id="copy-status" aria-live="polite"></p>
+          <div class="table-wrap" id="table-wrap" hidden></div>
+        </section>
+      </main>
+    </div>
+  </details>
+
+  <footer class="notes">
+    <h2>About this simulation</h2>
+    <p>The animation is driven by a mathematical model of blood production: stem cells feed growing cells, which mature over days and enter the blood, and the marrow speeds up when counts are low. Radiation kills dividing cells, but cells repair some damage when the dose is spread out. Each dot on screen stands for a share of the real population, so fewer dots means fewer cells.</p>
+    <p>This is a research and teaching tool, not medical advice. It leaves out infection, bleeding, transfusions, injury to other organs, and the special effects of heavy particles in space radiation. It is a first step toward a personal “digital twin” that would be tuned with each person’s own marrow cells grown on a tissue chip.</p>
+  </footer>
   <div class="tooltip" id="tooltip" role="status" hidden></div>
 </div>
 <script type="module">
@@ -1249,6 +1736,7 @@ function createHub(tooltipEl) {
   return {
     register(c) { charts.add(c); },
     reset() { charts.clear(); },
+    setToday(day) { for (const c of charts) c.today?.(day); },
     unregister(c) { charts.delete(c); },
     show(day, source, clientX, clientY) {
       for (const c of charts) c.crosshair(day);
@@ -1425,12 +1913,19 @@ function lineChart(el, opts) {
   }
 
   // Crosshair + hover
+  const todayLine = svgEl('line', { y1: m.top, y2: m.top + ih, stroke: 'var(--accent)', 'stroke-width': 1.5, visibility: 'hidden' }, svg);
   const cross = svgEl('line', { y1: m.top, y2: m.top + ih, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
   const dots = live.map((s) => svgEl('circle', { r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg));
   const hit = svgEl('rect', { x: m.left, y: m.top, width: iw, height: ih, fill: 'transparent', tabindex: 0 }, svg);
   hit.setAttribute('aria-label', `${opts.title}: use arrow keys to step through days`);
 
   const api = {
+    today(day) {
+      if (day == null || day < 0 || day > days) return todayLine.setAttribute('visibility', 'hidden');
+      todayLine.setAttribute('x1', x(day));
+      todayLine.setAttribute('x2', x(day));
+      todayLine.setAttribute('visibility', 'visible');
+    },
     crosshair(day) {
       if (day == null || day > days) {
         cross.setAttribute('visibility', 'hidden');
@@ -1571,7 +2066,14 @@ function timelineChart(el, opts) {
   }
 
   const cross = svgEl('line', { y1: m.top, y2: height - m.bottom, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  const todayLine = svgEl('line', { y1: m.top, y2: height - m.bottom, stroke: 'var(--accent)', 'stroke-width': 1.5, visibility: 'hidden' }, svg);
   const api = {
+    today(day) {
+      if (day == null || day < 0 || day > days) return todayLine.setAttribute('visibility', 'hidden');
+      todayLine.setAttribute('x1', x(day));
+      todayLine.setAttribute('x2', x(day));
+      todayLine.setAttribute('visibility', 'visible');
+    },
     crosshair(day) {
       if (day == null || day > days) return cross.setAttribute('visibility', 'hidden');
       cross.setAttribute('x1', x(day));
@@ -1584,7 +2086,896 @@ function timelineChart(el, opts) {
   return api;
 }
 
+// ---- src/scene.js ----
+// Illustrated, animated cross-section of bone marrow drawn on a canvas.
+// Cell counts on screen follow the model's populations for the selected day:
+// stem cells by the bone, growing cells in the marrow, finished cells in the blood vessel,
+// and fat cells that fill in as the marrow empties.
+
+const SW = 1000; // virtual scene width
+const SH = 620; // virtual scene height
+const VESSEL_TOP = 440;
+const VESSEL_BOT = 540;
+
+const CELL_INFO = {
+  hsc: { name: 'Stem cells', text: 'The “seeds” of blood. Each one can make every kind of blood cell and copy itself. They sit close to the bone.' },
+  prog_neutrophil: { name: 'Young white cells', text: 'Growing cells that become infection-fighting neutrophils in about 5 days.' },
+  prog_rbc: { name: 'Young red cells', text: 'Growing cells that become oxygen-carrying red blood cells in about a week.' },
+  prog_platelet: { name: 'Megakaryocytes', text: 'Giant cells that break off tiny fragments called platelets, which help blood clot.' },
+  prog_lymphocyte: { name: 'Young immune cells', text: 'Growing cells that become lymphocytes, the immune system’s defenders.' },
+  rbc: { name: 'Red blood cells', text: 'Carry oxygen around the body. They live about 4 months, so their number falls slowly.' },
+  neutrophil: { name: 'White blood cells', text: 'Neutrophils: first responders against infection. They last under a day in the blood, so they vanish fast when the marrow stops making them.' },
+  platelet: { name: 'Platelets', text: 'Tiny cell fragments that plug leaks and stop bleeding. They last about a week.' },
+  lymphocyte: { name: 'Lymphocytes', text: 'Immune cells that are unusually sensitive to radiation. Many die within a day or two.' },
+  fat: { name: 'Fat cells', text: 'Fill the space left when blood-making cells are lost. More fat means emptier marrow.' },
+  bone: { name: 'Spongy bone', text: 'Marrow lives inside the honeycomb of thin bone struts found in the hips, spine, ribs and long bones.' },
+  vessel: { name: 'Blood vessel', text: 'Finished cells squeeze through the thin wall and are carried to the rest of the body.' },
+};
+
+// Number of drawn cells at 100% of normal.
+const MAX = {
+  hsc: 9,
+  prog_neutrophil: 15,
+  prog_rbc: 14,
+  prog_platelet: 4,
+  prog_lymphocyte: 8,
+  rbc: 44,
+  neutrophil: 12,
+  platelet: 30,
+  lymphocyte: 10,
+};
+const ZONE = {
+  hsc: 'niche', prog_neutrophil: 'marrow', prog_rbc: 'marrow', prog_platelet: 'mega', prog_lymphocyte: 'marrow',
+  rbc: 'vessel', neutrophil: 'vessel', platelet: 'vessel', lymphocyte: 'vessel',
+};
+const RADIUS = {
+  hsc: 13, prog_neutrophil: 9, prog_rbc: 8.5, prog_platelet: 19, prog_lymphocyte: 8,
+  rbc: 7.5, neutrophil: 8, platelet: 2.8, lymphocyte: 6.5,
+};
+
+function boneTopY(x) {
+  return 58 + 12 * Math.sin(x / 83) + 7 * Math.sin(x / 31 + 1.3) + 5 * Math.sin(x / 17 + 0.4);
+}
+function boneBotY(x) {
+  return 578 + 9 * Math.sin(x / 71 + 2) + 6 * Math.sin(x / 27);
+}
+// Trabecular struts hanging from the top bone into the marrow.
+const STRUTS = [
+  { x: 210, len: 70, w: 22 },
+  { x: 520, len: 52, w: 18 },
+  { x: 790, len: 82, w: 24 },
+];
+
+function rnd(a, b) {
+  return a + Math.random() * (b - a);
+}
+
+// ---------- Cell drawing (shared with legend icons) ----------
+function drawCell(ctx, type, x, y, r, opts = {}) {
+  const { alpha = 1, hit = 0, seed = 0, phase = 0 } = opts;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y);
+  const grey = hit > 0;
+  switch (type) {
+    case 'hsc': {
+      const g = ctx.createRadialGradient(0, 0, r * 0.4, 0, 0, r * 2.1);
+      g.addColorStop(0, grey ? 'rgba(160,160,160,0.25)' : 'rgba(168,120,245,0.45)');
+      g.addColorStop(1, 'rgba(168,120,245,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(0, 0, r * (2 + 0.15 * Math.sin(phase * 2)), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = grey ? '#b9b4bd' : '#b591ee';
+      ctx.strokeStyle = grey ? '#8d8891' : '#7046b8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = grey ? '#6f6a73' : '#4b2490';
+      ctx.beginPath();
+      ctx.ellipse(r * 0.08, -r * 0.05, r * 0.55, r * 0.5, seed, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath();
+      ctx.arc(-r * 0.4, -r * 0.45, r * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'prog_neutrophil':
+    case 'prog_lymphocyte':
+    case 'prog_rbc': {
+      const c = {
+        prog_neutrophil: ['#dcc3ef', '#9d74c9', '#5e3596'],
+        prog_lymphocyte: ['#bcd3f4', '#7d9fd6', '#2d4c95'],
+        prog_rbc: ['#f2a7ac', '#cf6b73', '#5d1d39'],
+      }[type];
+      ctx.fillStyle = grey ? '#c4c0c6' : c[0];
+      ctx.strokeStyle = grey ? '#98939b' : c[1];
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = grey ? '#77727a' : c[2];
+      ctx.beginPath();
+      const nr = type === 'prog_rbc' ? 0.45 : 0.6;
+      ctx.arc(r * 0.1, 0, r * nr, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'prog_platelet': {
+      // Megakaryocyte: large, ruffled, multilobed nucleus.
+      ctx.fillStyle = grey ? '#cbc6cd' : '#e6c9ef';
+      ctx.strokeStyle = grey ? '#9a959c' : '#a56fbe';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i <= 24; i++) {
+        const a = (i / 24) * Math.PI * 2;
+        const rr = r * (1 + 0.07 * Math.sin(a * 5 + seed * 3));
+        const px = Math.cos(a) * rr;
+        const py = Math.sin(a) * rr;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = grey ? '#7a757d' : '#7a3c93';
+      for (const [dx, dy, s] of [[-0.25, -0.15, 0.32], [0.22, -0.2, 0.3], [0.05, 0.25, 0.33], [-0.3, 0.25, 0.22]]) {
+        ctx.beginPath();
+        ctx.arc(dx * r, dy * r, s * r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'rbc': {
+      ctx.rotate(seed * 6);
+      ctx.fillStyle = grey ? '#b7a9aa' : '#d3333f';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r, r * 0.92, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = grey ? '#9d8f90' : '#a8202d';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 0.45, r * 0.4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(-r * 0.1, -r * 0.1, r * 0.75, Math.PI * 1.1, Math.PI * 1.6);
+      ctx.stroke();
+      break;
+    }
+    case 'neutrophil': {
+      ctx.fillStyle = grey ? '#d4d0d6' : '#f1e6f4';
+      ctx.strokeStyle = grey ? '#a29ea4' : '#b48fc8';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = grey ? '#7d7980' : '#6c3f98';
+      ctx.rotate(seed * 4);
+      for (const [dx, dy] of [[-0.38, 0.05], [0.02, -0.3], [0.4, 0.08]]) {
+        ctx.beginPath();
+        ctx.arc(dx * r, dy * r, r * 0.27, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'platelet': {
+      ctx.rotate(seed * 5);
+      ctx.fillStyle = grey ? '#a9a4ab' : '#9466c2';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r * 1.3, r * 0.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'lymphocyte': {
+      ctx.fillStyle = grey ? '#cfcfd3' : '#d6e5fa';
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = grey ? '#77777e' : '#27468f';
+      ctx.beginPath();
+      ctx.arc(r * 0.08, 0, r * 0.78, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'fat': {
+      ctx.fillStyle = '#fff7e3';
+      ctx.strokeStyle = '#e3cf9f';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, r, r * 0.9, seed, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.beginPath();
+      ctx.ellipse(-r * 0.3, -r * 0.35, r * 0.25, r * 0.15, -0.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    default:
+      break;
+  }
+  if (hit > 0) {
+    // Damage crack
+    ctx.globalAlpha = alpha * Math.min(1, hit);
+    ctx.strokeStyle = '#3d3a40';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.6, -r * 0.3);
+    ctx.lineTo(-r * 0.1, r * 0.05);
+    ctx.lineTo(r * 0.15, -r * 0.2);
+    ctx.lineTo(r * 0.6, r * 0.35);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/** Draws a single legend icon into a small canvas element. */
+function drawIcon(canvas, type) {
+  const size = 36;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const r = { hsc: 10, prog_platelet: 13, platelet: 4, fat: 14 }[type] || 10;
+  if (type === 'platelet') {
+    drawCell(ctx, 'platelet', 11, 14, r, { seed: 0.2 });
+    drawCell(ctx, 'platelet', 24, 20, r, { seed: 1.1 });
+    drawCell(ctx, 'platelet', 15, 26, r, { seed: 2.4 });
+  } else {
+    drawCell(ctx, type, size / 2, size / 2, r, { seed: 0.4 });
+  }
+}
+
+function createScene(canvas, labelLayer, { onHover } = {}) {
+  const ctx = canvas.getContext('2d');
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let scale = 1;
+  let dpr = 1;
+  let parts = [];
+  let fats = [];
+  let beams = [];
+  let streaks = [];
+  let flash = 0;
+  let targets = { ...MAX };
+  let fatTarget = 4;
+  let chronic = false;
+  let playing = false;
+  let time = 0;
+  let last = performance.now();
+  let highlight = null;
+  let labelsOn = true;
+  let streakTimer = 0;
+  const spawnClock = {};
+
+  // Static textures
+  const osteocytes = Array.from({ length: 26 }, () => {
+    const top = Math.random() < 0.65;
+    const x = rnd(10, SW - 10);
+    const y = top ? rnd(10, boneTopY(x) - 10) : rnd(boneBotY(x) + 8, SH - 6);
+    return { x, y, a: rnd(0, Math.PI) };
+  });
+  const endo = [];
+  for (let x = 10; x < SW; x += 46) endo.push(x + rnd(-6, 6));
+
+  // ---------- Labels ----------
+  const LABELS = [
+    { key: 'bone', x: 640, y: 12, tx: 700, ty: 40, title: 'Bone', desc: 'Marrow lives inside it' },
+    { key: 'hsc', x: 40, y: 150, title: 'Stem cells', desc: 'The seeds of all blood' },
+    { key: 'marrow', x: 380, y: 245, title: 'Young blood cells', desc: 'Growing and dividing' },
+    { key: 'fat', x: 690, y: 300, title: 'Fat cells', desc: 'Fill empty space' },
+    { key: 'vessel', x: 40, y: 452, tx: 150, ty: 490, title: 'Blood vessel', desc: 'Carries finished cells → body' },
+  ];
+  const labelEls = {};
+  labelLayer.replaceChildren();
+  for (const L of LABELS) {
+    const el = document.createElement('div');
+    el.className = 'scene-label';
+    el.style.left = (L.x / SW) * 100 + '%';
+    el.style.top = (L.y / SH) * 100 + '%';
+    const t = document.createElement('strong');
+    t.textContent = L.title;
+    const d = document.createElement('span');
+    d.textContent = L.desc;
+    const v = document.createElement('em');
+    el.append(t, d, v);
+    labelLayer.append(el);
+    labelEls[L.key] = { el, v, L };
+  }
+
+  function resize() {
+    const cw = canvas.clientWidth || 800;
+    scale = cw / SW;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(cw * dpr);
+    canvas.height = Math.round(SH * scale * dpr);
+    canvas.style.height = SH * scale + 'px';
+    labelLayer.classList.toggle('compact', cw < 620);
+    if (reduced || !playing) render();
+  }
+
+  function zoneSpot(zone) {
+    if (zone === 'niche') {
+      const x = rnd(30, SW - 30);
+      return { x, y: boneTopY(x) + rnd(20, 48) };
+    }
+    if (zone === 'marrow') return { x: rnd(30, SW - 30), y: rnd(150, 390) };
+    if (zone === 'mega') return { x: rnd(60, SW - 60), y: rnd(395, 415) };
+    return { x: rnd(-20, SW + 20), y: rnd(VESSEL_TOP + 14, VESSEL_BOT - 14) };
+  }
+
+  function spawn(type, initial) {
+    const zone = ZONE[type];
+    let p = zoneSpot(zone);
+    if (type === 'platelet' && !initial) {
+      const megas = parts.filter((q) => q.type === 'prog_platelet' && !q.dying);
+      if (megas.length) {
+        const m = megas[Math.floor(Math.random() * megas.length)];
+        p = { x: m.x + rnd(-10, 10), y: VESSEL_TOP + 12 };
+      }
+    } else if (zone === 'vessel' && !initial) {
+      p = { x: rnd(0, SW), y: VESSEL_TOP + 10 + rnd(0, 4) };
+    }
+    parts.push({
+      type, x: p.x, y: p.y, vx: 0, vy: 0, r: RADIUS[type] * rnd(0.9, 1.1),
+      born: initial ? -10 : time, dying: null, hit: 0, seed: Math.random() * 6,
+      phase: Math.random() * 6, lane: rnd(VESSEL_TOP + 14, VESSEL_BOT - 14), speed: rnd(0.8, 1.2),
+    });
+  }
+
+  function placeFat(initial) {
+    for (let tries = 0; tries < 40; tries++) {
+      const r = rnd(22, 38);
+      const x = rnd(40, SW - 40);
+      const y = rnd(160 + r * 0.5, 395 - r * 0.6);
+      if (fats.every((f) => f.dying != null || Math.hypot(f.x - x, f.y - y) > f.r + r + 4)) {
+        fats.push({ x, y, r, seed: Math.random(), born: initial ? -10 : time, dying: null });
+        return;
+      }
+    }
+  }
+
+  function reconcile(initial = false) {
+    for (const type of Object.keys(MAX)) {
+      const alive = parts.filter((p) => p.type === type && p.dying == null);
+      const want = targets[type];
+      if (alive.length < want) {
+        const n = initial ? want - alive.length : 1;
+        const gap = initial ? 0 : 0.05;
+        if (initial || time - (spawnClock[type] || 0) > gap) {
+          for (let i = 0; i < n; i++) spawn(type, initial);
+          spawnClock[type] = time;
+        }
+      } else if (alive.length > want) {
+        const excess = alive.length - want;
+        alive.sort((a, b) => b.hit - a.hit || Math.random() - 0.5);
+        const n = initial ? excess : Math.max(1, Math.ceil(excess * 0.25));
+        for (let i = 0; i < n; i++) alive[i].dying = time;
+      }
+    }
+    const fAlive = fats.filter((f) => f.dying == null);
+    if (fAlive.length < fatTarget) placeFat(initial);
+    else if (fAlive.length > fatTarget) fAlive[fAlive.length - 1].dying = time;
+    if (initial) {
+      while (fats.filter((f) => f.dying == null).length < fatTarget) {
+        const before = fats.length;
+        placeFat(true);
+        if (fats.length === before) break;
+      }
+    }
+  }
+
+  function step(dt) {
+    time += dt;
+    const k = reduced ? 0 : 1;
+    for (const p of parts) {
+      p.phase += dt;
+      const zone = ZONE[p.type];
+      if (zone === 'vessel') {
+        p.x += 55 * p.speed * dt * k;
+        p.y += (p.lane - p.y) * Math.min(1, dt * 1.5) * k + Math.sin(p.phase * 2 + p.seed) * 0.15 * k;
+        if (p.x > SW + 25) p.x = -25;
+      } else if (zone !== 'mega') {
+        p.vx += rnd(-1, 1) * 30 * dt;
+        p.vy += rnd(-1, 1) * 30 * dt;
+        p.vx *= 0.96;
+        p.vy *= 0.96;
+        p.x += p.vx * dt * k;
+        p.y += p.vy * dt * k;
+        if (zone === 'niche') {
+          const top = boneTopY(p.x) + 16;
+          p.y = Math.min(Math.max(p.y, top), top + 40);
+        } else {
+          p.y = Math.min(Math.max(p.y, 150), 392);
+        }
+        p.x = Math.min(Math.max(p.x, 20), SW - 20);
+      }
+      if (p.hit > 0) p.hit = Math.max(0, p.hit - dt * 0.25);
+    }
+    parts = parts.filter((p) => p.dying == null || time - p.dying < 0.9);
+    fats = fats.filter((f) => f.dying == null || time - f.dying < 1.2);
+    beams = beams.filter((b) => time - b.t < 1.4);
+    streaks = streaks.filter((s) => time - s.t < 0.9);
+    flash = Math.max(0, flash - dt * 1.6);
+    if (chronic && playing && !reduced) {
+      streakTimer -= dt;
+      if (streakTimer <= 0) {
+        streakTimer = rnd(0.25, 0.7);
+        const x0 = rnd(-50, SW + 50);
+        streaks.push({ t: time, x0, y0: -10, x1: x0 + rnd(-300, 300), y1: SH + 10 });
+        const victims = parts.filter((p) => p.dying == null && Math.random() < 0.04);
+        for (const v of victims) v.hit = 1;
+      }
+    }
+    reconcile(false);
+  }
+
+  // ---------- Drawing ----------
+  function drawBackground() {
+    const g = ctx.createLinearGradient(0, 60, 0, VESSEL_TOP);
+    g.addColorStop(0, '#f8dcd5');
+    g.addColorStop(1, '#f2c5bf');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, SW, SH);
+    // faint stroma fibres
+    ctx.strokeStyle = 'rgba(200,120,120,0.13)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 14; i++) {
+      ctx.beginPath();
+      const y = 160 + i * 18;
+      ctx.moveTo(0, y);
+      for (let x = 0; x <= SW; x += 50) ctx.lineTo(x, y + 8 * Math.sin(x / 90 + i));
+      ctx.stroke();
+    }
+  }
+
+  function drawBone() {
+    const fillBone = (pathFn) => {
+      const g = ctx.createLinearGradient(0, 0, 0, SH);
+      g.addColorStop(0, '#efe5cf');
+      g.addColorStop(1, '#e6d9bb');
+      ctx.fillStyle = g;
+      ctx.strokeStyle = '#cdb98f';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      pathFn();
+      ctx.fill();
+      ctx.stroke();
+    };
+    fillBone(() => {
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, boneTopY(0));
+      for (let x = 0; x <= SW; x += 8) {
+        let y = boneTopY(x);
+        for (const s of STRUTS) {
+          const d = Math.abs(x - s.x);
+          if (d < s.w * 1.6) y += s.len * Math.cos((d / (s.w * 1.6)) * (Math.PI / 2)) ** 2;
+        }
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(SW, 0);
+      ctx.closePath();
+    });
+    fillBone(() => {
+      ctx.moveTo(0, SH);
+      for (let x = 0; x <= SW; x += 8) ctx.lineTo(x, boneBotY(x));
+      ctx.lineTo(SW, SH);
+      ctx.closePath();
+    });
+    // lamellae
+    ctx.strokeStyle = 'rgba(190,168,120,0.35)';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 3; i++) {
+      ctx.beginPath();
+      for (let x = 0; x <= SW; x += 10) ctx.lineTo(x, boneTopY(x) - i * 11);
+      ctx.stroke();
+      ctx.beginPath();
+      for (let x = 0; x <= SW; x += 10) ctx.lineTo(x, boneBotY(x) + i * 9);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(140,115,70,0.45)';
+    for (const o of osteocytes) {
+      ctx.beginPath();
+      ctx.ellipse(o.x, o.y, 4, 1.8, o.a, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawVessel() {
+    const g = ctx.createLinearGradient(0, VESSEL_TOP, 0, VESSEL_BOT);
+    g.addColorStop(0, '#f0b3b0');
+    g.addColorStop(0.5, '#f6c7c3');
+    g.addColorStop(1, '#eeaaa7');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, VESSEL_TOP, SW, VESSEL_BOT - VESSEL_TOP);
+    ctx.fillStyle = '#d9787e';
+    for (const [y0, dir] of [[VESSEL_TOP, -1], [VESSEL_BOT, 1]]) {
+      for (const x of endo) {
+        ctx.beginPath();
+        ctx.ellipse(x, y0 + dir * 2, 20, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    // flow chevrons
+    ctx.strokeStyle = 'rgba(160,50,60,0.18)';
+    ctx.lineWidth = 3;
+    const off = (time * 40) % 120;
+    for (let x = -120 + off; x < SW + 40; x += 120) {
+      ctx.beginPath();
+      ctx.moveTo(x, VESSEL_TOP + 38);
+      ctx.lineTo(x + 14, (VESSEL_TOP + VESSEL_BOT) / 2);
+      ctx.lineTo(x, VESSEL_BOT - 38);
+      ctx.stroke();
+    }
+  }
+
+  function lifeAlpha(p) {
+    const grow = Math.min(1, (time - p.born) / 0.6);
+    const die = p.dying != null ? Math.max(0, 1 - (time - p.dying) / 0.9) : 1;
+    return { a: Math.min(grow, die), s: (0.4 + 0.6 * grow) * (p.dying != null ? 0.6 + 0.4 * die : 1) };
+  }
+
+  function render() {
+    ctx.setTransform(scale * dpr, 0, 0, scale * dpr, 0, 0);
+    drawBackground();
+    for (const f of fats) {
+      const { a, s } = lifeAlpha(f);
+      drawCell(ctx, 'fat', f.x, f.y, f.r * s, { alpha: a * (highlight && highlight !== 'fat' ? 0.35 : 1), seed: f.seed });
+    }
+    drawVessel();
+    const order = ['prog_platelet', 'prog_rbc', 'prog_neutrophil', 'prog_lymphocyte', 'hsc', 'rbc', 'lymphocyte', 'neutrophil', 'platelet'];
+    for (const type of order) {
+      for (const p of parts) {
+        if (p.type !== type) continue;
+        const { a, s } = lifeAlpha(p);
+        const dim = highlight && !matchesHighlight(p.type) ? 0.25 : 1;
+        drawCell(ctx, p.type, p.x, p.y, p.r * s, { alpha: a * dim, hit: p.hit, seed: p.seed, phase: p.phase });
+      }
+    }
+    drawBone();
+    // radiation
+    for (const b of beams) {
+      const life = 1 - (time - b.t) / 1.4;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, life);
+      ctx.strokeStyle = '#d6f53c';
+      ctx.shadowColor = '#e8ff6a';
+      ctx.shadowBlur = 12;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      b.pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      ctx.stroke();
+      ctx.restore();
+    }
+    for (const st of streaks) {
+      const life = 1 - (time - st.t) / 0.9;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, life) * 0.8;
+      ctx.strokeStyle = '#c8f04a';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(st.x0, st.y0);
+      ctx.lineTo(st.x1, st.y1);
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (flash > 0) {
+      ctx.fillStyle = `rgba(226,250,120,${flash * 0.35})`;
+      ctx.fillRect(0, 0, SW, SH);
+    }
+    if (labelsOn) drawLeaders();
+  }
+
+  function matchesHighlight(type) {
+    if (!highlight) return true;
+    if (highlight === 'marrow') return type.startsWith('prog_');
+    return type === highlight;
+  }
+
+  function nearest(type, fx, fy) {
+    let best = null;
+    let bd = Infinity;
+    for (const p of parts) {
+      if (p.dying != null) continue;
+      if (type === 'marrow' ? !p.type.startsWith('prog_') || p.type === 'prog_platelet' : p.type !== type) continue;
+      const d = Math.hypot(p.x - fx, p.y - fy);
+      if (d < bd) { bd = d; best = p; }
+    }
+    return best;
+  }
+
+  function drawLeaders() {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(40,25,45,0.65)';
+    ctx.fillStyle = 'rgba(40,25,45,0.85)';
+    ctx.lineWidth = 1.2;
+    for (const { L } of Object.values(labelEls)) {
+      let tx = L.tx;
+      let ty = L.ty;
+      if (L.key === 'hsc' || L.key === 'marrow' || L.key === 'fat') {
+        const anchorY = L.y + 10;
+        let p = null;
+        if (L.key === 'fat') {
+          let bd = Infinity;
+          for (const f of fats) {
+            if (f.dying != null) continue;
+            const d = Math.hypot(f.x - L.x, f.y - anchorY);
+            if (d < bd) { bd = d; p = f; }
+          }
+        } else p = nearest(L.key, L.x + 60, anchorY);
+        if (!p) continue;
+        tx = p.x;
+        ty = p.y;
+      }
+      if (tx == null) continue;
+      const sx = L.x + 6;
+      const sy = L.y + 6;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(tx, ty, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    step(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  // Hover
+  function toScene(ev) {
+    const r = canvas.getBoundingClientRect();
+    return { x: ((ev.clientX - r.left) / r.width) * SW, y: ((ev.clientY - r.top) / r.height) * SH };
+  }
+  canvas.addEventListener('pointermove', (ev) => {
+    const { x, y } = toScene(ev);
+    let hitType = null;
+    let bd = Infinity;
+    for (const p of parts) {
+      if (p.dying != null) continue;
+      const d = Math.hypot(p.x - x, p.y - y);
+      if (d < p.r + 10 && d < bd) { bd = d; hitType = p.type; }
+    }
+    if (!hitType) {
+      for (const f of fats) if (f.dying == null && Math.hypot(f.x - x, f.y - y) < f.r) hitType = 'fat';
+    }
+    if (!hitType) {
+      if (y < boneTopY(x) || y > boneBotY(x)) hitType = 'bone';
+      else if (y > VESSEL_TOP && y < VESSEL_BOT) hitType = 'vessel';
+    }
+    onHover?.(hitType, ev.clientX, ev.clientY);
+  });
+  canvas.addEventListener('pointerleave', () => onHover?.(null));
+
+  window.addEventListener('resize', resize);
+  new ResizeObserver(resize).observe(canvas);
+  resize();
+  reconcile(true);
+  render();
+  requestAnimationFrame((t) => { last = t; requestAnimationFrame(loop); });
+
+  return {
+    /** levels: { hsc, prog_*, rbc, neutrophil, platelet, lymphocyte } as fractions of normal. */
+    setLevels(levels, { instant = false } = {}) {
+      for (const type of Object.keys(MAX)) {
+        const rel = Math.max(0, levels[type] ?? 1);
+        let n = rel * MAX[type];
+        n = n > 0.02 && n < 1 ? 1 : Math.round(n);
+        targets[type] = Math.min(n, Math.round(MAX[type] * 1.6));
+      }
+      const cell = (levels.prog_neutrophil + levels.prog_rbc + levels.prog_platelet + levels.prog_lymphocyte) / 4;
+      fatTarget = Math.round(3 + 9 * Math.max(0, 1 - Math.min(1, cell)));
+      if (instant) reconcile(true);
+    },
+    zap(strength = 1) {
+      const s = Math.max(0.15, Math.min(1, strength));
+      flash = 0.6 + 0.4 * s;
+      const n = Math.round(4 + 6 * s);
+      for (let i = 0; i < n; i++) {
+        const x0 = rnd(-100, SW);
+        const pts = [];
+        let x = x0;
+        for (let y = -10; y <= SH + 20; y += 40) {
+          pts.push([x, y]);
+          x += rnd(10, 40) * (i % 2 ? 1 : -1) + 12;
+        }
+        beams.push({ t: time, pts });
+      }
+      for (const p of parts) {
+        if (p.dying != null) continue;
+        const sensitive = p.type === 'hsc' || p.type.startsWith('prog_') || p.type === 'lymphocyte';
+        if (sensitive && Math.random() < 0.25 + 0.7 * s) p.hit = 1.5;
+      }
+    },
+    setChronic(on) { chronic = on; },
+    setPlaying(on) { playing = on; },
+    setHighlight(type) { highlight = type; if (reduced) render(); },
+    setLabels(on) {
+      labelsOn = on;
+      labelLayer.hidden = !on;
+      if (reduced) render();
+    },
+    setLabelValues(vals) {
+      for (const [k, v] of Object.entries(vals)) if (labelEls[k]) labelEls[k].v.textContent = v;
+    },
+  };
+}
+
+// ---- src/story.js ----
+// Plain-language interpretation of model output for a given day.
+
+const LAY_LINEAGE = {
+  neutrophil: { title: 'Infection fighters', sub: 'White blood cells (neutrophils)', risk: 'infections' },
+  platelet: { title: 'Blood clotting', sub: 'Platelets', risk: 'bruising and bleeding' },
+  rbc: { title: 'Oxygen delivery', sub: 'Red cells (hemoglobin)', risk: 'tiredness and breathlessness' },
+  lymphocyte: { title: 'Immune defense', sub: 'Lymphocytes', risk: 'weakened immunity' },
+};
+const STATUS_WORDS = ['Normal', 'Slightly low', 'Low', 'Very low', 'Dangerously low'];
+
+/** Population levels relative to normal at a given day (day < 0 is before anything happens). */
+function levelsAt(res, day) {
+  if (day < 0) {
+    const ones = { hsc: 1 };
+    for (const l of LINEAGES) { ones[l] = 1; ones['prog_' + l] = 1; }
+    return ones;
+  }
+  const out = { hsc: interp(res.t, res.marrow.hsc, day) };
+  for (const l of LINEAGES) {
+    out[l] = interp(res.t, res.bloodRel[l], day);
+    out['prog_' + l] = interp(res.t, res.marrow[l], day);
+  }
+  return out;
+}
+
+function healthAt(res, day) {
+  const h = {};
+  for (const l of LINEAGES) {
+    const base = res.profile.baseline[l];
+    const rel = day < 0 ? 1 : interp(res.t, res.bloodRel[l], day);
+    const value = rel * base;
+    h[l] = { rel, value, grade: ctcaeGrade(l, value) };
+  }
+  return h;
+}
+
+function describeDose(gy) {
+  if (gy <= 0) return 'No radiation.';
+  if (gy < 0.05) return 'Very low, similar to a few CT scans. No visible effect on blood.';
+  if (gy < 0.5) return 'Low. No symptoms expected; blood counts barely change.';
+  if (gy < 1) return 'Mild. A small, temporary dip in some blood counts.';
+  if (gy < 2) return 'Radiation sickness begins. Blood counts drop for several weeks.';
+  if (gy < 3.5) return 'Moderate. Real risk of infection and bleeding; medical care needed.';
+  if (gy < 6) return 'Severe. Around the dose that kills half of people who get no treatment.';
+  return 'Very severe. Most stem cells are destroyed; survival needs a stem-cell transplant.';
+}
+
+function describeField(fx) {
+  if (fx >= 0.99) return 'Whole body exposed. No marrow is protected.';
+  if (fx >= 0.7) return `Most of the body. ${Math.round((1 - fx) * 100)}% of the marrow is shielded and keeps working.`;
+  if (fx >= 0.4) return `About half the body. ${Math.round((1 - fx) * 100)}% of the marrow is shielded and helps refill the rest.`;
+  return `A small part of the body. Most marrow (${Math.round((1 - fx) * 100)}%) is protected.`;
+}
+
+/** Key moments for the timeline chips. */
+function keyMoments(res, sum, cfg) {
+  const moments = [];
+  const pulses = expandExposures(cfg.exposures);
+  const acute = pulses.filter((p) => p.end - p.start < 30);
+  if (acute.length) moments.push({ day: acute[0].start, kind: 'zap', text: 'Radiation' });
+  const chronic = (cfg.exposures || []).find((e) => e.kind === 'chronic');
+  if (chronic) moments.push({ day: chronic.startDay, kind: 'zap', text: 'Low dose begins' });
+  const add = (l, text) => {
+    const s = sum[l];
+    if (s.nadirRel < 0.85) moments.push({ day: s.nadirDay, kind: 'low', text });
+  };
+  add('lymphocyte', 'Immune cells lowest');
+  add('neutrophil', 'White cells lowest');
+  add('platelet', 'Platelets lowest');
+  const n = sum.neutrophil;
+  if (n.recoveryDay != null && n.nadirRel < 0.8) moments.push({ day: n.recoveryDay, kind: 'up', text: 'White cells recovered' });
+  for (const iv of cfg.interventions || []) {
+    if (iv.kind === 'hsct') moments.push({ day: iv.day, kind: 'rx', text: 'Stem-cell transplant' });
+    if (iv.kind === 'gcsf') moments.push({ day: iv.startDay, kind: 'rx', text: 'White-cell booster starts' });
+    if (iv.kind === 'tpo') moments.push({ day: iv.startDay, kind: 'rx', text: 'Platelet booster starts' });
+  }
+  return moments.filter((m) => m.day <= cfg.days).sort((a, b) => a.day - b.day);
+}
+
+/** Headline and short explanation of what is happening on this day. */
+function narrate(res, sum, cfg, day) {
+  const pulses = expandExposures(cfg.exposures);
+  const total = sum.totalDose;
+  const chronic = (cfg.exposures || []).find((e) => e.kind === 'chronic');
+  const first = pulses.length ? pulses[0].start : Infinity;
+  const ivs = cfg.interventions || [];
+
+  if (!pulses.length) {
+    return { title: 'Healthy marrow', body: 'No radiation is set. The marrow keeps making blood cells at a steady rate. Pick a scenario below to see what changes.' };
+  }
+  if (day < first) {
+    return {
+      title: 'Healthy marrow',
+      body: 'Stem cells next to the bone keep making new blood cells, which mature and slip into the blood vessel. Press play to see what happens next.',
+    };
+  }
+  const during = pulses.find((p) => day >= p.start && day <= p.end + 0.15 && p.end - p.start < 30);
+  if (during) {
+    return {
+      title: 'Radiation is passing through',
+      body: 'Radiation damages the DNA of cells that are dividing. Stem cells, young blood cells and lymphocytes are the most vulnerable. Finished red cells and platelets are barely affected.',
+    };
+  }
+
+  const h = healthAt(res, day);
+  const lv = levelsAt(res, day);
+  const worst = Math.max(...LINEAGES.map((l) => h[l].grade));
+  const prev = healthAt(res, Math.max(0, day - 1));
+  const ancFalling = h.neutrophil.rel < prev.neutrophil.rel - 0.002;
+  const ancRising = h.neutrophil.rel > prev.neutrophil.rel + 0.002;
+  const sentences = [];
+
+  if (chronic && total < 1.5) {
+    const title = worst === 0 ? 'Keeping up with the damage' : 'Counts are dipping';
+    sentences.push('Cosmic rays arrive a few at a time. Between hits the marrow repairs DNA and replaces lost cells, so the same total dose does far less harm than if it came all at once.');
+    sentences.push(`Total so far: ${(interp(res.t, res.cumDose, day) * 1000).toFixed(0)} mGy.`);
+    return { title, body: sentences.join(' ') };
+  }
+
+  let title;
+  if (worst === 0) title = day > first + 1 && sum.worstGrade > 0 ? 'The marrow has recovered' : 'Blood counts look normal';
+  else if (worst <= 2) title = ancRising ? 'Counts are coming back' : 'Blood counts are dipping';
+  else if (worst === 3) title = ancRising ? 'Still very low, but recovering' : 'Blood counts are very low';
+  else title = 'Danger zone';
+
+  const since = day - first;
+  if (since < 7 && h.lymphocyte.grade >= 2) {
+    sentences.push('Lymphocytes fall first, within a day or two. Doctors use the speed of this drop to estimate the dose.');
+  }
+  if (ancFalling && since < 25 && h.neutrophil.rel > 0.15) {
+    sentences.push('White cells keep falling: the ones in the blood were made before the exposure and are used up, while few new ones are coming out of the marrow.');
+  }
+  if (h.neutrophil.grade >= 4) sentences.push('With so few infection fighters, even a minor infection could be life-threatening.');
+  else if (h.neutrophil.grade === 3) sentences.push('Infection risk is high.');
+  if (h.platelet.grade >= 3) sentences.push('Platelets are low, so bruising and bleeding become a risk.');
+  if (lv.hsc < 0.05 && !ivs.some((i) => i.kind === 'hsct' && i.day <= day)) {
+    sentences.push('Very few stem cells survived. Recovery will be slow, and at high doses it may not happen without a transplant.');
+  } else if (ancRising && worst > 0) {
+    sentences.push('Surviving stem cells are refilling the marrow, and new cells are reaching the blood again.');
+  }
+  if (ivs.some((i) => i.kind === 'gcsf' && day >= i.startDay && day < i.endDay) && h.neutrophil.grade > 0) {
+    sentences.push('The white-cell booster (G-CSF) is pushing the marrow to make neutrophils faster.');
+  }
+  if (ivs.some((i) => i.kind === 'hsct' && day >= i.day && day < i.day + 3)) {
+    sentences.push('Donor stem cells have been infused. They settle in the marrow and start rebuilding it.');
+  }
+  if (h.rbc.grade >= 1 && sentences.length < 3) {
+    sentences.push('Red cells live about four months, so hemoglobin drifts down slowly rather than crashing.');
+  }
+  if (worst === 0 && since > 3) {
+    sentences.push(lv.hsc < 0.9 ? `Blood counts are back to normal, though the stem-cell pool is still rebuilding (${Math.round(lv.hsc * 100)}% of normal).` : 'Stem cells, young cells and blood counts are all back near normal.');
+  }
+  if (!sentences.length) sentences.push('The marrow is working to replace the cells that were lost.');
+  return { title, body: sentences.slice(0, 3).join(' ') };
+}
+
 // ---- src/app.js ----
+
+
 
 
 const $ = (id) => document.getElementById(id);
@@ -1745,6 +3136,7 @@ function syncControls() {
   syncParamInputs();
   renderExposureList();
   syncOutputs();
+  syncSimple();
 }
 
 function syncOutputs() {
@@ -2076,8 +3468,9 @@ function renderAll() {
   const sum = summarize(res);
   state.last = { cfg, res, sum };
   renderSummary();
-  renderCharts();
+  if ($('expert').open) renderCharts();
   if (state.showTable) renderTable();
+  onModelUpdated();
 }
 
 function renderSummary() {
@@ -2221,6 +3614,7 @@ function renderCharts() {
     ariaLabel: `Marrow stem cell and progenitor pools over ${days} days, log scale.`,
   });
   renderMarrowLegend(Boolean(cmp));
+  hub.setToday(play.day);
 }
 
 function renderMarrowLegend(withCompare) {
@@ -2302,11 +3696,545 @@ function resultsCSV() {
   return lines.join('\n');
 }
 
+// =====================================================================
+// Illustrated, plain-language view
+// =====================================================================
+
+const ICON = {
+  trefoil: (fill, extra = '') => `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="${fill}"/>${trefoilPath('#2a1f00')}${extra}</svg>`,
+};
+function trefoilPath(color) {
+  let d = '';
+  for (let k = 0; k < 3; k++) {
+    const a0 = (-90 + k * 120 - 30) * (Math.PI / 180);
+    const a1 = (-90 + k * 120 + 30) * (Math.PI / 180);
+    const r0 = 6.5;
+    const r1 = 17;
+    const p = (r, a) => `${(24 + r * Math.cos(a)).toFixed(2)} ${(24 + r * Math.sin(a)).toFixed(2)}`;
+    d += `M${p(r0, a0)} L${p(r1, a0)} A${r1} ${r1} 0 0 1 ${p(r1, a1)} L${p(r0, a1)} A${r0} ${r0} 0 0 0 ${p(r0, a0)} Z `;
+  }
+  return `<path d="${d}" fill="${color}"/><circle cx="24" cy="24" r="4" fill="${color}"/>`;
+}
+const SCENARIO_ICONS = {
+  'acute-2': ICON.trefoil('#f5d547'),
+  'acute-4': ICON.trefoil('#f39a3d'),
+  'acute-4-gcsf': ICON.trefoil('#f39a3d', '<g transform="translate(29 27) rotate(45)"><rect x="0" y="0" width="16" height="7" rx="2" fill="#fff" stroke="#2a1f00" stroke-width="1.6"/><rect x="16" y="2.5" width="5" height="2" fill="#2a1f00"/><rect x="-3" y="1.5" width="3" height="4" fill="#2a1f00"/></g>'),
+  'partial-6': '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#cdbff0"/><path d="M24 9 L37 14 V24 C37 32 31 37 24 40 C17 37 11 32 11 24 V14 Z" fill="#6a3fc1"/><path d="M24 9 L37 14 V24 C37 32 31 37 24 40 Z" fill="#8f6ad6"/></svg>',
+  'tbi-12': '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#bfe3dc"/><rect x="19" y="11" width="10" height="26" rx="2" fill="#0d7c6a"/><rect x="11" y="19" width="26" height="10" rx="2" fill="#0d7c6a"/></svg>',
+  spe: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#1e2350"/><circle cx="24" cy="24" r="8" fill="#ffcc3d"/>' + Array.from({ length: 10 }, (_, i) => { const a = (i / 10) * Math.PI * 2; return `<line x1="${24 + 11 * Math.cos(a)}" y1="${24 + 11 * Math.sin(a)}" x2="${24 + 17 * Math.cos(a)}" y2="${24 + 17 * Math.sin(a)}" stroke="#ffcc3d" stroke-width="2.4" stroke-linecap="round"/>`; }).join('') + '</svg>',
+  'gcr-mars': '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#141836"/><circle cx="26" cy="26" r="11" fill="#d8643a"/><circle cx="22" cy="23" r="2.5" fill="#b44a26"/><circle cx="30" cy="30" r="1.8" fill="#b44a26"/><circle cx="12" cy="13" r="1" fill="#fff"/><circle cx="36" cy="11" r="1.2" fill="#fff"/><circle cx="10" cy="34" r="0.9" fill="#fff"/><line x1="6" y1="40" x2="16" y2="30" stroke="#c8f04a" stroke-width="1.4"/></svg>',
+};
+const LAY_SCENARIOS = {
+  'acute-2': { tag: 'Accident', name: 'Brief exposure', blurb: 'A worker gets 2 Gy all at once.' },
+  'acute-4': { tag: 'Accident', name: 'Severe exposure', blurb: '4 Gy all at once, no treatment.' },
+  'acute-4-gcsf': { tag: 'Accident', name: 'Severe, then treated', blurb: '4 Gy, then white-cell booster shots.' },
+  'partial-6': { tag: 'Accident', name: 'Partly shielded', blurb: '6 Gy, but 40% of the marrow was protected.' },
+  'tbi-12': { tag: 'Hospital', name: 'Cancer treatment', blurb: 'Whole-body radiation before a stem-cell transplant.' },
+  spe: { tag: 'Space', name: 'Solar storm', blurb: 'An astronaut gets 1.5 Gy over 12 hours.' },
+  'gcr-mars': { tag: 'Space', name: 'Trip to Mars', blurb: 'Cosmic rays every day for 2½ years.' },
+};
+const LEGEND_TYPES = ['hsc', 'prog_neutrophil', 'prog_rbc', 'prog_platelet', 'prog_lymphocyte', 'neutrophil', 'rbc', 'platelet', 'lymphocyte', 'fat'];
+const DOSE_LOG_MIN = Math.log10(0.005);
+const DOSE_LOG_MAX = Math.log10(15);
+const DOSE_TICKS = [
+  { d: 0.01, top: '0.01 Gy', label: 'CT scan', row: 0 },
+  { d: 0.45, top: '0.45', label: 'Mars trip', row: 0 },
+  { d: 4, top: '4', label: 'Deadly', row: 0 },
+  { d: 12, top: '12', label: 'Transplant prep', row: 1 },
+];
+const MODE_TEXT = {
+  instant: 'A sudden exposure, like an accident. Cells get no time to repair between hits.',
+  hours: 'Spreading the dose out gives cells time to repair some damage, so the harm is smaller.',
+  split: 'Radiotherapy is split into sessions, 12 hours apart, so healthy cells can repair in between.',
+  daily: 'Like space travel: a tiny dose each day. Cells repair and replace losses as they go.',
+};
+
+const play = { day: -2, playing: false, speed: 1, lastT: 0, lastUi: 0, prevDay: -2 };
+let scene;
+const meterEls = {};
+const legendEls = {};
+
+function dayMin() {
+  return -Math.max(1, state.days * 0.03);
+}
+const sliderToDose = (v) => Math.pow(10, DOSE_LOG_MIN + (v / 1000) * (DOSE_LOG_MAX - DOSE_LOG_MIN));
+const doseToSlider = (d) => Math.round(((Math.log10(Math.max(0.005, d)) - DOSE_LOG_MIN) / (DOSE_LOG_MAX - DOSE_LOG_MIN)) * 1000);
+function niceDose(d) {
+  if (d < 0.01) return Math.round(d * 10000) / 10000;
+  if (d < 1) return Math.round(d * 100) / 100;
+  return Math.round(d * 10) / 10;
+}
+function fmtDose(d) {
+  if (d < 0.1) return `${fmtNum(d * 1000, 0)} mGy`;
+  return `${fmtNum(d, d < 1 ? 2 : 1)} Gy`;
+}
+
+function deriveSimple() {
+  const ex = state.exposures;
+  const total = totalDose(ex);
+  const chronic = ex.find((e) => e.kind === 'chronic');
+  const acute = ex.find((e) => e.kind !== 'chronic');
+  let mode = 'instant';
+  if (chronic && !acute) mode = 'daily';
+  else if (acute && (acute.fractions || 1) > 1) mode = 'split';
+  else if (acute && (acute.durationHours || 0) >= 0.5) mode = 'hours';
+  return {
+    total,
+    mode,
+    hours: acute?.durationHours >= 0.5 ? acute.durationHours : 12,
+    sessions: (acute?.fractions || 1) > 1 ? acute.fractions : 6,
+    start: acute?.day ?? 0,
+  };
+}
+
+function applySimple(changes) {
+  const cur = { ...deriveSimple(), ...changes };
+  const total = Math.max(0.005, cur.total);
+  const start = cur.start || 0;
+  if (cur.mode === 'daily') {
+    state.exposures = [{ kind: 'chronic', startDay: 0, endDay: state.days, ratemGyPerDay: (total * 1000) / state.days }];
+  } else if (cur.mode === 'split') {
+    const n = Math.round(cur.sessions);
+    state.exposures = [{ kind: 'acute', day: start, dose: total / n, fractions: n, intervalHours: 12, durationHours: 0.25 }];
+  } else if (cur.mode === 'hours') {
+    state.exposures = [{ kind: 'acute', day: start, dose: total, durationHours: cur.hours, fractions: 1, intervalHours: 24 }];
+  } else {
+    state.exposures = [{ kind: 'acute', day: start, dose: total, durationHours: 0, fractions: 1, intervalHours: 24 }];
+  }
+  markEdited();
+  renderExposureList();
+  schedule();
+}
+
+function buildScenarioCards() {
+  const wrap = $('scenario-cards');
+  wrap.replaceChildren();
+  for (const s of SCENARIOS) {
+    const lay = LAY_SCENARIOS[s.id] || { tag: s.group, name: s.name, blurb: s.note };
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'scard';
+    b.setAttribute('role', 'radio');
+    b.dataset.id = s.id;
+    b.innerHTML = SCENARIO_ICONS[s.id] || '';
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.textContent = lay.tag;
+    const n = document.createElement('strong');
+    n.textContent = lay.name;
+    const sm = document.createElement('small');
+    sm.textContent = lay.blurb;
+    b.append(tag, n, sm);
+    b.addEventListener('click', () => {
+      loadScenario(s.id);
+      syncControls();
+      renderAll();
+      restartPlayback();
+    });
+    wrap.append(b);
+  }
+}
+
+function buildDoseScale() {
+  const el = $('dose-scale');
+  el.replaceChildren();
+  for (const t of DOSE_TICKS) {
+    const pos = (doseToSlider(t.d) / 1000) * 100;
+    const d = document.createElement('div');
+    d.className = 'dose-tick' + (t.row ? ' row2' : '') + (pos > 93 ? ' edge-r' : pos < 8 ? ' edge-l' : '');
+    d.style.left = pos + '%';
+    const a = document.createElement('span');
+    a.textContent = t.top;
+    const b = document.createElement('span');
+    b.textContent = t.label;
+    d.append(a, b);
+    el.append(d);
+  }
+}
+
+function buildMeters() {
+  const wrap = $('meters');
+  wrap.replaceChildren();
+  for (const l of ['neutrophil', 'platelet', 'rbc', 'lymphocyte']) {
+    const info = LAY_LINEAGE[l];
+    const m = document.createElement('div');
+    m.className = 'meter';
+    m.innerHTML = '<div class="meter-top"><div class="meter-name"><strong></strong><small></small></div><span class="meter-status"><span class="ico"></span><span class="word"></span></span></div><div class="meter-bar"><div class="meter-fill"></div></div><div class="meter-foot"><span class="pct"></span><span class="abs"></span></div>';
+    m.querySelector('strong').textContent = info.title;
+    m.querySelector('small').textContent = info.sub;
+    const bar = m.querySelector('.meter-bar');
+    const base = state.profile.baseline[l];
+    const bounds = CTCAE[l];
+    for (const b of [bounds[2], bounds[3]]) {
+      if (b == null) continue;
+      const t = document.createElement('div');
+      t.className = 'meter-tick';
+      t.style.left = (Math.min(1.3, b / base) / 1.3) * 100 + '%';
+      bar.append(t);
+    }
+    wrap.append(m);
+    meterEls[l] = {
+      fill: m.querySelector('.meter-fill'),
+      ico: m.querySelector('.ico'),
+      word: m.querySelector('.word'),
+      pct: m.querySelector('.pct'),
+      abs: m.querySelector('.abs'),
+    };
+  }
+}
+
+function buildLegend() {
+  const wrap = $('cell-legend');
+  wrap.replaceChildren();
+  for (const type of LEGEND_TYPES) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cell-chip';
+    const c = document.createElement('canvas');
+    drawIcon(c, type);
+    const txt = document.createElement('div');
+    const n = document.createElement('strong');
+    n.textContent = CELL_INFO[type].name;
+    const v = document.createElement('span');
+    txt.append(n, v);
+    b.append(c, txt);
+    const show = (ev) => {
+      scene.setHighlight(type);
+      const r = b.getBoundingClientRect();
+      showInfoTip(type, ev?.clientX ?? r.left + r.width / 2, ev?.clientY ?? r.top);
+    };
+    const hide = () => { scene.setHighlight(null); $('tooltip').hidden = true; };
+    b.addEventListener('pointerenter', show);
+    b.addEventListener('pointerleave', hide);
+    b.addEventListener('focus', () => show());
+    b.addEventListener('blur', hide);
+    wrap.append(b);
+    legendEls[type] = v;
+  }
+}
+
+let currentLevels = null;
+function showInfoTip(type, x, y) {
+  const el = $('tooltip');
+  const info = CELL_INFO[type];
+  if (!info) { el.hidden = true; return; }
+  el.replaceChildren();
+  const h = document.createElement('div');
+  h.className = 'tt-title';
+  h.textContent = info.name;
+  const p = document.createElement('div');
+  p.className = 'tt-text';
+  p.textContent = info.text;
+  el.append(h, p);
+  if (currentLevels && currentLevels[type] != null) {
+    const v = document.createElement('div');
+    v.className = 'tt-head';
+    v.textContent = `${fmtPct(currentLevels[type])} of normal today`;
+    el.append(v);
+  }
+  el.hidden = false;
+  const w = el.offsetWidth;
+  const hh = el.offsetHeight;
+  let left = x + 14;
+  if (left + w > window.innerWidth - 8) left = x - 14 - w;
+  let top = y - hh - 12;
+  if (top < 8) top = y + 16;
+  el.style.left = Math.max(8, left) + 'px';
+  el.style.top = top + 'px';
+}
+
+function syncSimple() {
+  const s = deriveSimple();
+  $('dose-slider').value = doseToSlider(s.total);
+  $('dose-out').textContent = fmtDose(s.total);
+  $('dose-say').textContent = describeDose(s.total);
+  for (const b of $('mode-seg').querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset.mode === s.mode));
+  const sub = $('mode-sub');
+  const rng = $('mode-sub-range');
+  if (s.mode === 'hours') {
+    sub.hidden = false;
+    $('mode-sub-label').textContent = 'Spread over';
+    rng.min = 1; rng.max = 72; rng.step = 1;
+    rng.value = s.hours;
+    $('mode-sub-out').textContent = `${fmtNum(s.hours, 0)} hours`;
+  } else if (s.mode === 'split') {
+    sub.hidden = false;
+    $('mode-sub-label').textContent = 'Number of sessions';
+    rng.min = 2; rng.max = 12; rng.step = 1;
+    rng.value = s.sessions;
+    $('mode-sub-out').textContent = `${s.sessions} × ${fmtDose(s.total / s.sessions)}`;
+  } else {
+    sub.hidden = true;
+  }
+  $('mode-say').textContent = s.mode === 'daily'
+    ? `${MODE_TEXT.daily} About ${fmtNum((s.total * 1000) / Math.max(1, (state.exposures[0]?.endDay ?? state.days) - (state.exposures[0]?.startDay ?? 0)), 2)} mGy per day.`
+    : MODE_TEXT[s.mode];
+  $('fx-simple').value = state.fx;
+  $('fx-big').textContent = `${Math.round(state.fx * 100)}%`;
+  $('fx-say').textContent = describeField(state.fx);
+  $('rx-gcsf').checked = state.gcsf.on;
+  $('rx-tpo').checked = state.tpo.on;
+  $('rx-hsct').checked = state.hsct.on;
+  $('sens-simple').value = state.profile.radiosensitivity;
+  $('reserve-simple').value = state.profile.marrowReserve;
+  const word = (v, lo, hi) => (v < 0.85 ? lo : v > 1.15 ? hi : 'Typical');
+  $('sens-say').textContent = `${word(state.profile.radiosensitivity, 'Less sensitive', 'More sensitive')} (×${(+state.profile.radiosensitivity).toFixed(2)})`;
+  $('reserve-say').textContent = `${word(state.profile.marrowReserve, 'Slower', 'Faster')} (×${(+state.profile.marrowReserve).toFixed(2)})`;
+  for (const b of $('days-seg').querySelectorAll('button')) b.setAttribute('aria-checked', String(+b.dataset.days === state.days));
+  for (const c of $('scenario-cards').querySelectorAll('.scard')) c.setAttribute('aria-checked', String(!state.edited && c.dataset.id === state.scenarioId));
+  // Body figure
+  const h = 250 * state.fx;
+  $('field-rect').setAttribute('height', h);
+  $('shield-rect').setAttribute('y', h);
+  $('shield-rect').setAttribute('height', 250 - h);
+  $('field-edge').setAttribute('y1', h);
+  $('field-edge').setAttribute('y2', h);
+  $('field-edge').style.display = state.fx >= 0.99 ? 'none' : '';
+  $('body-caption').textContent = state.fx >= 0.99
+    ? 'The whole body is in the radiation field.'
+    : `About ${Math.round(state.fx * 100)}% of the marrow is in the field. The shielded ${Math.round((1 - state.fx) * 100)}% keeps making blood and helps refill the rest.`;
+}
+
+function bindSimple() {
+  $('dose-slider').addEventListener('input', (ev) => {
+    const d = niceDose(sliderToDose(+ev.target.value));
+    $('dose-out').textContent = fmtDose(d);
+    $('dose-say').textContent = describeDose(d);
+    applySimple({ total: d });
+  });
+  for (const b of $('mode-seg').querySelectorAll('button')) {
+    b.addEventListener('click', () => {
+      applySimple({ mode: b.dataset.mode });
+      syncSimple();
+    });
+  }
+  $('mode-sub-range').addEventListener('input', (ev) => {
+    const s = deriveSimple();
+    if (s.mode === 'hours') applySimple({ hours: +ev.target.value });
+    else if (s.mode === 'split') applySimple({ sessions: +ev.target.value });
+    syncSimple();
+  });
+  $('fx-simple').addEventListener('input', (ev) => {
+    state.fx = +ev.target.value;
+    markEdited();
+    syncControls();
+    schedule();
+  });
+  for (const [id, key] of [['rx-gcsf', 'gcsf'], ['rx-tpo', 'tpo'], ['rx-hsct', 'hsct']]) {
+    $(id).addEventListener('change', (ev) => {
+      state[key].on = ev.target.checked;
+      markEdited();
+      syncControls();
+      schedule();
+    });
+  }
+  $('sens-simple').addEventListener('input', (ev) => { state.profile.radiosensitivity = +ev.target.value; syncControls(); schedule(); });
+  $('reserve-simple').addEventListener('input', (ev) => { state.profile.marrowReserve = +ev.target.value; syncControls(); schedule(); });
+  for (const b of $('days-seg').querySelectorAll('button')) {
+    b.addEventListener('click', () => {
+      state.days = +b.dataset.days;
+      syncControls();
+      schedule(0);
+    });
+  }
+  $('expert').addEventListener('toggle', () => { if ($('expert').open) renderCharts(); });
+
+  // Player
+  $('play').addEventListener('click', () => (play.playing ? pause() : start()));
+  $('day-slider').addEventListener('input', (ev) => {
+    pause();
+    setDay(+ev.target.value);
+  });
+  $('speed').addEventListener('change', (ev) => { play.speed = +ev.target.value; });
+  $('labels-toggle').addEventListener('click', (ev) => {
+    const on = ev.currentTarget.getAttribute('aria-pressed') !== 'true';
+    ev.currentTarget.setAttribute('aria-pressed', String(on));
+    ev.currentTarget.textContent = on ? 'Labels on' : 'Labels off';
+    scene.setLabels(on);
+  });
+}
+
+function setPlayIcon() {
+  $('play-icon').setAttribute('d', play.playing ? 'M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z' : 'M7 4.5v15l12-7.5z');
+  $('play').setAttribute('aria-label', play.playing ? 'Pause' : 'Play');
+}
+function start() {
+  if (play.day >= state.days - 1e-6) setDay(dayMin(), { silent: true });
+  play.playing = true;
+  play.lastT = performance.now();
+  scene.setPlaying(true);
+  setPlayIcon();
+  requestAnimationFrame(tick);
+}
+function pause() {
+  play.playing = false;
+  scene?.setPlaying(false);
+  setPlayIcon();
+}
+function restartPlayback() {
+  pause();
+  setDay(dayMin(), { silent: true, instant: true });
+  if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) setTimeout(start, 350);
+}
+function tick(now) {
+  if (!play.playing) return;
+  const dt = Math.min(0.1, (now - play.lastT) / 1000);
+  play.lastT = now;
+  const span = state.days - dayMin();
+  // Whole time span plays in ~26 s; the first days after an exposure play slower so the drama is visible.
+  let rate = (span / 26) * play.speed;
+  if (play.day < 3 && state.days > 40) rate *= 0.35;
+  let next = play.day + rate * dt;
+  if (next >= state.days) {
+    next = state.days;
+    play.playing = false;
+    scene.setPlaying(false);
+    setPlayIcon();
+  }
+  setDay(next);
+  if (play.playing) requestAnimationFrame(tick);
+}
+
+function setDay(day, { silent = false, instant = false } = {}) {
+  const prev = play.day;
+  play.day = Math.max(dayMin(), Math.min(state.days, day));
+  if (!state.last) return;
+  const { res, cfg } = state.last;
+  const slider = $('day-slider');
+  slider.value = play.day;
+  // Radiation flashes for pulses crossed while moving forward.
+  if (!silent && play.day > prev) {
+    for (const p of expandExposures(cfg.exposures)) {
+      if (p.end - p.start > 30) continue;
+      if (p.start > prev && p.start <= play.day) {
+        scene.zap(Math.min(1, p.dose / 4));
+        const fr = $('field-rect');
+        fr.classList.remove('field-pulse');
+        void fr.getBoundingClientRect();
+        fr.classList.add('field-pulse');
+      }
+    }
+  }
+  const chronic = cfg.exposures.find((e) => e.kind === 'chronic');
+  scene.setChronic(Boolean(chronic && play.day >= chronic.startDay && play.day < chronic.endDay));
+  currentLevels = { ...levelsAt(res, play.day), fat: null };
+  scene.setLevels(currentLevels, { instant });
+  const now = performance.now();
+  if (play.playing && now - play.lastUi < 90) return;
+  play.lastUi = now;
+  updateReadout();
+}
+
+function updateReadout() {
+  const { res, cfg, sum } = state.last;
+  const day = play.day;
+  const lv = currentLevels;
+  const before = day < 0;
+  const dayTxt = before ? 'Before' : `Day ${Math.floor(day)}`;
+  $('badge-day').textContent = dayTxt;
+  const chronic = cfg.exposures.find((e) => e.kind === 'chronic');
+  $('badge-sub').textContent = before ? 'exposure' : chronic ? 'of the mission' : 'after exposure';
+  $('story-day').textContent = before ? 'Before exposure' : `Day ${Math.floor(day)}`;
+  const n = narrate(res, sum, cfg, day);
+  $('story-title').textContent = n.title;
+  $('story-body').textContent = n.body;
+  const h = healthAt(res, day);
+  const ICONS = ['✓', '!', '!', '!!', '!!'];
+  for (const [l, el] of Object.entries(meterEls)) {
+    const g = h[l].grade;
+    el.fill.style.width = (Math.min(1.3, h[l].rel) / 1.3) * 100 + '%';
+    el.fill.style.backgroundColor = `var(--g${g})`;
+    el.ico.style.backgroundColor = `var(--g${g})`;
+    el.ico.style.color = g === 2 || g === 3 ? 'var(--pill-ink-dark)' : '#fff';
+    el.ico.textContent = ICONS[g];
+    el.word.textContent = STATUS_WORDS[g];
+    el.pct.textContent = `${fmtPct(h[l].rel)} of normal`;
+    el.abs.textContent = `${fmtNum(h[l].value)} ${LINEAGE_INFO[l].unit}`;
+  }
+  for (const [type, el] of Object.entries(legendEls)) {
+    el.textContent = type === 'fat' ? (lv.prog_neutrophil < 0.6 ? 'more than usual' : 'normal amount') : `${fmtPct(lv[type])} of normal`;
+  }
+  const prog = (lv.prog_neutrophil + lv.prog_rbc + lv.prog_platelet + lv.prog_lymphocyte) / 4;
+  scene.setLabelValues({ hsc: `${fmtPct(lv.hsc)} of normal`, marrow: `${fmtPct(prog)} of normal` });
+  hub.setToday(day);
+}
+
+function onModelUpdated() {
+  syncSimple();
+  buildMeters();
+  const { res, sum, cfg } = state.last;
+  const slider = $('day-slider');
+  slider.min = dayMin();
+  slider.max = state.days;
+  slider.step = Math.max(0.05, state.days / 800);
+  $('track-end').textContent = `Day ${state.days}`;
+  // Markers
+  const span = state.days - dayMin();
+  const pos = (d) => ((d - dayMin()) / span) * 100;
+  const marks = $('track-marks');
+  marks.replaceChildren();
+  const moments = keyMoments(res, sum, cfg);
+  for (const e of cfg.exposures.filter((x) => x.kind === 'chronic')) {
+    const b = document.createElement('div');
+    b.className = 'track-band';
+    b.style.left = pos(Math.max(0, e.startDay)) + '%';
+    b.style.width = pos(Math.min(state.days, e.endDay)) - pos(Math.max(0, e.startDay)) + '%';
+    marks.append(b);
+  }
+  for (const m of moments) {
+    const d = document.createElement('div');
+    d.className = `track-mark ${m.kind}`;
+    d.style.left = pos(m.day) + '%';
+    d.title = m.text;
+    marks.append(d);
+  }
+  const mw = $('moments');
+  mw.replaceChildren();
+  for (const m of moments) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'moment';
+    const i = document.createElement('i');
+    i.className = m.kind;
+    const dd = document.createElement('b');
+    dd.textContent = `Day ${fmtNum(m.day, 0)}`;
+    const t = document.createElement('span');
+    t.textContent = m.text;
+    b.append(i, dd, t);
+    b.addEventListener('click', () => {
+      pause();
+      setDay(m.day + (m.kind === 'zap' ? 0.3 : 0), { silent: m.kind !== 'zap' });
+      if (m.kind === 'zap') scene.zap(1);
+    });
+    mw.append(b);
+  }
+  if (play.day > state.days) play.day = state.days;
+  setDay(play.day, { silent: true });
+  updateReadout();
+}
+
+function initIllustrated() {
+  scene = createScene($('scene'), $('scene-labels'), {
+    onHover: (type, x, y) => {
+      if (!type) { $('tooltip').hidden = true; scene.setHighlight(null); return; }
+      showInfoTip(type, x, y);
+    },
+  });
+  buildScenarioCards();
+  buildDoseScale();
+  buildMeters();
+  buildLegend();
+  bindSimple();
+}
+
 // ---------- Boot ----------
 populateScenarioSelect();
 loadScenario(state.scenarioId);
+initIllustrated();
 syncControls();
 bindControls();
+play.day = dayMin();
 renderAll();
+restartPlayback();
 
 </script>

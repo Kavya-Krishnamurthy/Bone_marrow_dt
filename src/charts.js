@@ -50,6 +50,7 @@ export function createHub(tooltipEl) {
   return {
     register(c) { charts.add(c); },
     reset() { charts.clear(); },
+    setToday(day) { for (const c of charts) c.today?.(day); },
     unregister(c) { charts.delete(c); },
     show(day, source, clientX, clientY) {
       for (const c of charts) c.crosshair(day);
@@ -226,12 +227,19 @@ export function lineChart(el, opts) {
   }
 
   // Crosshair + hover
+  const todayLine = svgEl('line', { y1: m.top, y2: m.top + ih, stroke: 'var(--accent)', 'stroke-width': 1.5, visibility: 'hidden' }, svg);
   const cross = svgEl('line', { y1: m.top, y2: m.top + ih, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
   const dots = live.map((s) => svgEl('circle', { r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg));
   const hit = svgEl('rect', { x: m.left, y: m.top, width: iw, height: ih, fill: 'transparent', tabindex: 0 }, svg);
   hit.setAttribute('aria-label', `${opts.title}: use arrow keys to step through days`);
 
   const api = {
+    today(day) {
+      if (day == null || day < 0 || day > days) return todayLine.setAttribute('visibility', 'hidden');
+      todayLine.setAttribute('x1', x(day));
+      todayLine.setAttribute('x2', x(day));
+      todayLine.setAttribute('visibility', 'visible');
+    },
     crosshair(day) {
       if (day == null || day > days) {
         cross.setAttribute('visibility', 'hidden');
@@ -372,7 +380,14 @@ export function timelineChart(el, opts) {
   }
 
   const cross = svgEl('line', { y1: m.top, y2: height - m.bottom, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  const todayLine = svgEl('line', { y1: m.top, y2: height - m.bottom, stroke: 'var(--accent)', 'stroke-width': 1.5, visibility: 'hidden' }, svg);
   const api = {
+    today(day) {
+      if (day == null || day < 0 || day > days) return todayLine.setAttribute('visibility', 'hidden');
+      todayLine.setAttribute('x1', x(day));
+      todayLine.setAttribute('x2', x(day));
+      todayLine.setAttribute('visibility', 'visible');
+    },
     crosshair(day) {
       if (day == null || day > days) return cross.setAttribute('visibility', 'hidden');
       cross.setAttribute('x1', x(day));
