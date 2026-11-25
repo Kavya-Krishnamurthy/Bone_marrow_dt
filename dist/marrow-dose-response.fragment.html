@@ -1,0 +1,2312 @@
+<title>Marrow Dose Response</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: instrument-panel sidebar of inputs beside a scrolling column of readouts and charts. */
+:root {
+  /* Neutrals lean slightly blue, like a lab bench under fluorescent light. */
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --surface-2: #eef1f5;
+  --ink: #16202b;
+  --ink-2: #5a6674;
+  --rule: #dfe4ea;
+  --rule-strong: #c3cbd4;
+  --accent: #9b2335; /* marrow crimson: dose and primary actions only */
+  --accent-ink: #ffffff;
+  --accent-wash: rgba(155, 35, 53, 0.09);
+  --focus: #257de0;
+
+  /* Chart roles (dataviz reference palette, light steps) */
+  --series-1: #257de0;
+  --series-2: #f47230;
+  --series-3: #00b894;
+  --series-4: #f2a600;
+  --series-5: #ee7fac;
+  --compare: #8a95a3;
+  --grid: #e7eaee;
+  --axis: #c2c8cf;
+  --band-g4: rgba(220, 60, 61, 0.08);
+  --band-g3: rgba(241, 138, 89, 0.07);
+  --iv-gcsf: #00b894;
+  --iv-tpo: #f2a600;
+  --iv-hsct: #6a4ce2;
+
+  /* Status (CTCAE grade pills) */
+  --g0: #0aac23;
+  --g1: #7a8a1e;
+  --g2: #fbb315;
+  --g3: #f18a59;
+  --g4: #dc3c3d;
+  --pill-ink-dark: #0b0b0b;
+
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius: 6px;
+  --step--1: 0.8125rem;
+  --step-0: 0.9375rem;
+  --step-1: 1.125rem;
+  --step-2: 1.5rem;
+  --step-3: 2.25rem;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1419;
+    --surface: #171d24;
+    --surface-2: #1f2730;
+    --ink: #e8edf2;
+    --ink-2: #9aa6b3;
+    --rule: #2a333d;
+    --rule-strong: #3a4550;
+    --accent: #e0637a;
+    --accent-ink: #12090b;
+    --accent-wash: rgba(224, 99, 122, 0.14);
+    --focus: #6aabf1;
+    --series-1: #338ced;
+    --series-2: #e76624;
+    --series-3: #00a888;
+    --series-4: #d28e05;
+    --series-5: #e24d8b;
+    --compare: #7b8794;
+    --grid: #252d36;
+    --axis: #44505c;
+    --band-g4: rgba(220, 60, 61, 0.14);
+    --band-g3: rgba(241, 138, 89, 0.1);
+    --iv-gcsf: #00a888;
+    --iv-tpo: #d28e05;
+    --iv-hsct: #9887ef;
+    --g1: #a8b84a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1419;
+  --surface: #171d24;
+  --surface-2: #1f2730;
+  --ink: #e8edf2;
+  --ink-2: #9aa6b3;
+  --rule: #2a333d;
+  --rule-strong: #3a4550;
+  --accent: #e0637a;
+  --accent-ink: #12090b;
+  --accent-wash: rgba(224, 99, 122, 0.14);
+  --focus: #6aabf1;
+  --series-1: #338ced;
+  --series-2: #e76624;
+  --series-3: #00a888;
+  --series-4: #d28e05;
+  --series-5: #e24d8b;
+  --compare: #7b8794;
+  --grid: #252d36;
+  --axis: #44505c;
+  --band-g4: rgba(220, 60, 61, 0.14);
+  --band-g3: rgba(241, 138, 89, 0.1);
+  --iv-gcsf: #00a888;
+  --iv-tpo: #d28e05;
+  --iv-hsct: #9887ef;
+  --g1: #a8b84a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.app {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: 0.005em; }
+h1 { font-size: var(--step-3); font-weight: 600; line-height: 1.05; }
+h2 { font-size: var(--step-1); font-weight: 600; }
+p { margin: 0; }
+code { font-family: var(--font-data); font-size: 0.86em; background: var(--surface-2); padding: 0 4px; border-radius: 3px; }
+
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 20px;
+}
+.masthead-text { display: grid; gap: 8px; max-width: 68ch; }
+.eyebrow { font-family: var(--font-data); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+.lede { color: var(--ink-2); }
+.masthead-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .controls { order: 2; }
+}
+
+/* Controls */
+.controls { display: grid; gap: 12px; min-width: 0; }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.advanced summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
+.advanced summary::before { content: "▸"; color: var(--ink-2); transition: transform 0.15s; }
+.advanced[open] summary::before { transform: rotate(90deg); }
+.advanced summary::-webkit-details-marker { display: none; }
+
+.field { display: grid; gap: 4px; font-size: var(--step--1); color: var(--ink-2); min-width: 0; }
+.field > span { display: flex; justify-content: space-between; gap: 8px; }
+.field output { font-family: var(--font-data); color: var(--ink); }
+.field.mini span { display: block; }
+input[type="number"], select {
+  font: inherit;
+  font-size: var(--step-0);
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  padding: 5px 8px;
+  width: 100%;
+  min-width: 0;
+}
+input[type="number"] { font-family: var(--font-data); font-size: var(--step--1); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.check { display: flex; align-items: center; gap: 8px; font-size: var(--step--1); color: var(--ink); cursor: pointer; }
+.hint { font-size: var(--step--1); color: var(--ink-2); }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.iv { display: grid; gap: 6px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.iv:last-child { border-bottom: 0; padding-bottom: 0; }
+.iv-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding-left: 24px; }
+.iv-fields.off { opacity: 0.45; }
+
+.exposure-list { display: grid; gap: 8px; }
+.exposure {
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  background: var(--surface-2);
+}
+.exposure-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.exposure-kind { font-family: var(--font-data); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+.exposure-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.exposure-empty { font-size: var(--step--1); color: var(--ink-2); padding: 8px; border: 1px dashed var(--rule-strong); border-radius: 4px; }
+
+.btn {
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--surface-2); }
+.btn-small { padding: 3px 9px; }
+.btn-quiet { border-color: transparent; background: transparent; color: var(--ink-2); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+.btn-icon { padding: 0 6px; line-height: 1.4; color: var(--ink-2); border-color: transparent; background: transparent; }
+.btn-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.file-btn { position: relative; overflow: hidden; display: inline-block; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.file-btn:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.status-line { font-size: var(--step--1); color: var(--ink-2); min-height: 1em; }
+.status-line.error { color: var(--g4); }
+.fit-result { font-size: var(--step--1); display: grid; gap: 8px; padding: 10px; background: var(--accent-wash); border-radius: 4px; }
+.fit-result dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; }
+.fit-result dt { color: var(--ink-2); }
+.fit-result dd { margin: 0; font-family: var(--font-data); }
+
+/* Results */
+.results { display: grid; gap: 16px; min-width: 0; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.card-head { display: grid; gap: 2px; }
+.card-head.row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.card-sub { font-size: var(--step--1); color: var(--ink-2); }
+.key-line { display: inline-block; width: 18px; height: 0; border-top: 2px dashed var(--compare); vertical-align: middle; margin: 0 4px 0 8px; }
+
+.summary { display: grid; gap: 12px; }
+.verdict {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  align-items: baseline;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.verdict-main { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: var(--step-2); font-weight: 600; line-height: 1.15; }
+.verdict-facts { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: var(--step--1); color: var(--ink-2); }
+.verdict-facts b { font-family: var(--font-data); font-weight: 500; color: var(--ink); }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 460px) { .tiles { grid-template-columns: minmax(0, 1fr); } }
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  min-width: 0;
+}
+.tile-label { font-size: var(--step--1); color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.tile-value { font-size: var(--step-2); font-weight: 600; line-height: 1.1; }
+.tile-value small { font-size: var(--step--1); font-weight: 400; color: var(--ink-2); margin-left: 4px; }
+.tile-meta { font-size: var(--step--1); color: var(--ink-2); display: grid; gap: 1px; }
+.tile-meta b { font-family: var(--font-data); font-weight: 500; color: var(--ink); }
+.tile-delta { font-family: var(--font-data); font-size: var(--step--1); color: var(--ink-2); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-data);
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: #fff;
+  white-space: nowrap;
+}
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.85; }
+.pill.g0 { background: var(--g0); }
+.pill.g1 { background: var(--g1); }
+.pill.g2 { background: var(--g2); color: var(--pill-ink-dark); }
+.pill.g3 { background: var(--g3); color: var(--pill-ink-dark); }
+.pill.g4 { background: var(--g4); }
+.verdict .pill { font-size: var(--step--1); padding: 2px 10px; }
+
+.blood-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+@media (max-width: 700px) { .blood-grid { grid-template-columns: minmax(0, 1fr); } }
+.chart { position: relative; min-width: 0; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.chart svg text { font-family: var(--font-body); }
+.chart .tick { font-family: var(--font-data); font-size: 10.5px; fill: var(--ink-2); font-variant-numeric: tabular-nums; }
+.chart .ctitle { font-family: var(--font-display); font-size: 13.5px; font-weight: 600; fill: var(--ink); }
+.chart .cunit { font-size: 11px; fill: var(--ink-2); }
+.chart .tlabel { font-family: var(--font-data); font-size: 10px; fill: var(--ink-2); }
+.chart .endlabel { font-family: var(--font-data); font-size: 10.5px; fill: var(--ink); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: var(--step--1); color: var(--ink-2); }
+.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.legend-swatch { width: 16px; height: 0; border-top: 2px solid; border-radius: 2px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--ink-2); background: var(--surface); }
+
+.tooltip {
+  position: fixed;
+  z-index: 20;
+  pointer-events: none;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  box-shadow: 0 6px 20px rgba(10, 20, 30, 0.14);
+  padding: 8px 10px;
+  font-size: var(--step--1);
+  min-width: 160px;
+  max-width: 260px;
+}
+.tooltip .tt-head { font-family: var(--font-data); color: var(--ink-2); margin-bottom: 4px; }
+.tooltip .tt-row { display: grid; grid-template-columns: 14px 1fr auto; gap: 6px; align-items: center; }
+.tooltip .tt-key { width: 12px; border-top: 2px solid; }
+.tooltip .tt-key.dash { border-top-style: dashed; }
+.tooltip .tt-val { font-family: var(--font-data); font-weight: 500; text-align: right; }
+.tooltip .tt-name { color: var(--ink-2); }
+
+.table-wrap { overflow-x: auto; max-height: 420px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: var(--step--1); font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; color: var(--ink-2); }
+td { font-family: var(--font-data); }
+
+.notes p { color: var(--ink-2); max-width: 75ch; font-size: var(--step--1); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+</style>
+<div class="app">
+  <header class="masthead">
+    <div class="masthead-text">
+      <p class="eyebrow">Hematopoietic radiation response · preliminary digital twin</p>
+      <h1>Marrow Dose Response</h1>
+      <p class="lede">Set an exposure, a person and any countermeasures. The model projects stem cells, marrow progenitors and blood counts day by day, using literature-informed parameters that you can calibrate against tissue-chip data.</p>
+    </div>
+    <div class="masthead-actions">
+      <button type="button" id="pin-btn" class="btn">Pin as comparison</button>
+      <button type="button" id="unpin-btn" class="btn btn-quiet" hidden>Clear comparison</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="controls" aria-label="Simulation inputs">
+      <section class="panel">
+        <h2>Scenario</h2>
+        <label class="field">
+          <span>Preset</span>
+          <select id="scenario"></select>
+        </label>
+        <p class="hint" id="scenario-note"></p>
+        <label class="field">
+          <span>Time horizon</span>
+          <select id="days">
+            <option value="30">30 days</option>
+            <option value="60">60 days</option>
+            <option value="90">90 days</option>
+            <option value="180">180 days</option>
+            <option value="365">1 year</option>
+            <option value="900">900 days</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Exposures</h2>
+          <div class="btn-row">
+            <button type="button" class="btn btn-small" id="add-acute">+ Acute</button>
+            <button type="button" class="btn btn-small" id="add-chronic">+ Chronic</button>
+          </div>
+        </div>
+        <div id="exposure-list" class="exposure-list"></div>
+        <p class="hint">Doses are absorbed dose to active marrow. A duration above 0 spreads the dose evenly; repair between increments lowers the effect.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Field geometry</h2>
+        <label class="field range">
+          <span>Marrow in the field <output id="fx-out"></output></span>
+          <input type="range" id="fx" min="0.1" max="1" step="0.05">
+        </label>
+        <label class="field range">
+          <span>Dose to shielded marrow <output id="shield-out"></output></span>
+          <input type="range" id="shield" min="0" max="0.5" step="0.05">
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Countermeasures</h2>
+        <div class="iv">
+          <label class="check"><input type="checkbox" id="gcsf-on"> G-CSF (filgrastim-like)</label>
+          <div class="iv-fields">
+            <label class="field mini"><span>Start day</span><input type="number" id="gcsf-start" min="0" step="1"></label>
+            <label class="field mini"><span>Stop day</span><input type="number" id="gcsf-end" min="0" step="1"></label>
+          </div>
+        </div>
+        <div class="iv">
+          <label class="check"><input type="checkbox" id="tpo-on"> TPO receptor agonist (romiplostim-like)</label>
+          <div class="iv-fields">
+            <label class="field mini"><span>Start day</span><input type="number" id="tpo-start" min="0" step="1"></label>
+            <label class="field mini"><span>Stop day</span><input type="number" id="tpo-end" min="0" step="1"></label>
+          </div>
+        </div>
+        <div class="iv">
+          <label class="check"><input type="checkbox" id="hsct-on"> Stem-cell infusion</label>
+          <div class="iv-fields">
+            <label class="field mini"><span>Day</span><input type="number" id="hsct-day" min="0" step="1"></label>
+            <label class="field mini"><span>Graft (% of normal HSC pool)</span><input type="number" id="hsct-dose" min="0.1" max="50" step="0.5"></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Individual profile</h2>
+        <div class="grid-2">
+          <label class="field mini"><span>ANC ×10⁹/L</span><input type="number" id="b-neutrophil" min="0.5" max="15" step="0.1"></label>
+          <label class="field mini"><span>Platelets ×10⁹/L</span><input type="number" id="b-platelet" min="50" max="600" step="5"></label>
+          <label class="field mini"><span>Hgb g/dL</span><input type="number" id="b-rbc" min="6" max="20" step="0.1"></label>
+          <label class="field mini"><span>ALC ×10⁹/L</span><input type="number" id="b-lymphocyte" min="0.3" max="6" step="0.1"></label>
+        </div>
+        <label class="field range">
+          <span>Radiosensitivity <output id="sens-out"></output></span>
+          <input type="range" id="sens" min="0.4" max="2" step="0.05">
+        </label>
+        <label class="field range">
+          <span>Marrow regenerative reserve <output id="reserve-out"></output></span>
+          <input type="range" id="reserve" min="0.4" max="2" step="0.05">
+        </label>
+        <p class="hint">Both multipliers are 1.0 for the reference adult. These are the values the calibration step personalises.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Calibrate from chip data</h2>
+        <p class="hint">Load measurements relative to unexposed control as <code>day,target,value</code>. Targets: <code>hsc</code>, <code>progenitor:neutrophil</code>, <code>progenitor:platelet</code>, <code>progenitor:rbc</code>, <code>progenitor:lymphocyte</code>, or a blood count (<code>neutrophil</code>, <code>platelet</code>, <code>rbc</code>, <code>lymphocyte</code>). The fit uses the exposures set above.</p>
+        <div class="btn-row">
+          <label class="btn btn-small file-btn">Choose CSV<input type="file" id="csv-file" accept=".csv,text/csv"></label>
+          <button type="button" class="btn btn-small" id="load-example">Load synthetic example</button>
+          <button type="button" class="btn btn-small" id="clear-obs" hidden>Clear data</button>
+        </div>
+        <p class="status-line" id="obs-status" aria-live="polite"></p>
+        <label class="check"><input type="checkbox" id="fit-reserve"> Also fit regenerative reserve</label>
+        <button type="button" class="btn btn-primary" id="fit-btn" disabled>Fit profile to data</button>
+        <div id="fit-result" class="fit-result" hidden></div>
+      </section>
+
+      <details class="panel advanced">
+        <summary><h2>Model parameters</h2></summary>
+        <div class="grid-2">
+          <label class="field mini"><span>HSC α (Gy⁻¹)</span><input type="number" id="p-hsc-alpha" step="0.05" min="0"></label>
+          <label class="field mini"><span>HSC β (Gy⁻²)</span><input type="number" id="p-hsc-beta" step="0.01" min="0"></label>
+          <label class="field mini"><span>HSC regeneration (/day)</span><input type="number" id="p-hsc-regen" step="0.01" min="0.005"></label>
+          <label class="field mini"><span>Repair half-time (h)</span><input type="number" id="p-repair" step="0.25" min="0.1"></label>
+          <label class="field mini"><span>Doomed-cell half-life (d)</span><input type="number" id="p-doomed" step="0.25" min="0.25"></label>
+          <label class="field mini"><span>Neutrophil marrow transit (d)</span><input type="number" id="p-mtt-n" step="0.5" min="1"></label>
+        </div>
+        <button type="button" class="btn btn-small btn-quiet" id="reset-params">Reset to defaults</button>
+      </details>
+    </aside>
+
+    <main class="results" aria-label="Simulation results">
+      <section class="summary" id="summary" aria-live="polite"></section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Exposure and treatment timeline</h2>
+          <p class="card-sub" id="timeline-sub"></p>
+        </div>
+        <div id="timeline" class="chart chart-timeline"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Peripheral blood counts</h2>
+          <p class="card-sub">Shaded band and dashed rules mark CTCAE v5 grade 3 and 4 thresholds. <span id="compare-key" hidden><span class="key-line key-compare"></span> pinned comparison</span></p>
+        </div>
+        <div class="blood-grid">
+          <div class="chart" id="chart-neutrophil"></div>
+          <div class="chart" id="chart-platelet"></div>
+          <div class="chart" id="chart-rbc"></div>
+          <div class="chart" id="chart-lymphocyte"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Marrow compartments</h2>
+          <p class="card-sub">Percent of the pre-exposure pool, log scale. Points are loaded observations.</p>
+        </div>
+        <div class="legend" id="marrow-legend"></div>
+        <div class="chart chart-tall" id="chart-marrow"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-head row">
+          <h2>Data table</h2>
+          <div class="btn-row">
+            <button type="button" class="btn btn-small" id="toggle-table" aria-expanded="false">Show table</button>
+            <button type="button" class="btn btn-small" id="copy-csv">Copy CSV</button>
+          </div>
+        </div>
+        <p class="status-line" id="copy-status" aria-live="polite"></p>
+        <div class="table-wrap" id="table-wrap" hidden></div>
+      </section>
+
+      <section class="card notes">
+        <h2>What this model is and is not</h2>
+        <p>Each lineage follows a stem cell → progenitor → three maturation stages → blood chain with feedback from the circulating count, after the Friberg myelosuppression model. Radiation kills dividing marrow cells and circulating lymphocytes by the linear-quadratic model with repair of sublethal damage, so fractionation and low dose rate are less damaging than the same dose given at once. Shielded marrow is simulated as a separate site that keeps producing cells.</p>
+        <p>It does not model mortality, infection, bleeding, transfusion, gastrointestinal or cutaneous injury, the early neutrophil rise from demargination, or long-term stem-cell exhaustion and clonal effects. Space-radiation quality (high-LET ions) is not represented beyond absorbed dose. Treat outputs as hypotheses for experiments, not clinical guidance.</p>
+      </section>
+    </main>
+  </div>
+  <div class="tooltip" id="tooltip" role="status" hidden></div>
+</div>
+<script type="module">
+// ---- src/model.js ----
+// Bone marrow radiation response model.
+//
+// A compartmental model of human hematopoiesis under ionizing radiation:
+//   HSC  ->  lineage progenitors (P)  ->  3 maturation transit stages (T1..T3)  ->  blood (C)
+// for four lineages: neutrophil, platelet, erythrocyte (as hemoglobin) and lymphocyte.
+//
+// Structure follows the semi-mechanistic myelosuppression model of Friberg et al.
+// (J Clin Oncol 2002; 20:4713) with feedback (C0/C)^gamma, extended with an upstream
+// stem-cell compartment, a two-site marrow (exposed / shielded) for partial-body
+// exposure, and radiation cell kill from the linear-quadratic (LQ) model with
+// first-order repair of sublethal damage, which reproduces fractionation and
+// dose-rate sparing (Lea-Catcheside dose-protraction factor).
+//
+// All marrow compartments are normalised to 1 at steady state. Blood compartments
+// are normalised to 1 and scaled to the individual's baseline counts for display.
+// Time unit: days. Dose unit: Gy (absorbed dose to marrow).
+//
+// Parameter values are literature-informed defaults, not fitted to individual data.
+// See docs/MODEL.md for sources, assumptions and limitations.
+
+const LINEAGES = ['neutrophil', 'platelet', 'rbc', 'lymphocyte'];
+
+const LINEAGE_INFO = {
+  neutrophil: { label: 'Neutrophils (ANC)', short: 'ANC', unit: '×10⁹/L', progenitor: 'Myeloid progenitors' },
+  platelet: { label: 'Platelets', short: 'PLT', unit: '×10⁹/L', progenitor: 'Megakaryocyte progenitors' },
+  rbc: { label: 'Hemoglobin', short: 'Hgb', unit: 'g/dL', progenitor: 'Erythroid progenitors' },
+  lymphocyte: { label: 'Lymphocytes (ALC)', short: 'ALC', unit: '×10⁹/L', progenitor: 'Lymphoid progenitors' },
+};
+
+const DEFAULT_PARAMS = {
+  // Stem cells: logistic regeneration, asymmetric division assumed so differentiation
+  // output does not deplete the pool.
+  hsc: { alpha: 0.7, beta: 0.06, regen: 0.08 },
+  // Progenitors that lose clonogenic capacity keep dividing for a few generations
+  // (abortive proliferation) before dying, which delays the blood-count nadir.
+  doomedHalfLife: 2,
+  // First-order repair of sublethal damage. Half-time ~1.5 h, typical for normal tissue.
+  repairHalfTimeHours: 1.5,
+  lineages: {
+    neutrophil: {
+      mtt: 5.5, // marrow transit time progenitor->blood, days (Friberg MTT ~125 h)
+      bloodHalfLife: 0.3, // days (~7 h circulating half-life)
+      gamma: 0.2, // feedback exponent (G-CSF axis)
+      fmax: 3, // cap on feedback amplification
+      progenitor: { alpha: 0.75, beta: 0.04 },
+      precursor: { alpha: 0.35, beta: 0.02 }, // dividing precursors (T1)
+    },
+    platelet: {
+      mtt: 7,
+      bloodHalfLife: 5.5, // ~8-day mean lifespan approximated as exponential
+      gamma: 0.35, // TPO axis
+      fmax: 3,
+      progenitor: { alpha: 0.6, beta: 0.04 },
+      precursor: { alpha: 0.25, beta: 0.02 },
+    },
+    rbc: {
+      mtt: 6,
+      bloodHalfLife: 83, // ~120-day mean lifespan
+      gamma: 0.6, // EPO axis
+      fmax: 5,
+      progenitor: { alpha: 0.8, beta: 0.04 },
+      precursor: { alpha: 0.35, beta: 0.02 },
+    },
+    lymphocyte: {
+      mtt: 10,
+      bloodHalfLife: 40,
+      gamma: 0.15,
+      fmax: 3,
+      progenitor: { alpha: 0.9, beta: 0.05 },
+      precursor: { alpha: 0.5, beta: 0.03 },
+      // Circulating lymphocytes are the one radiosensitive blood population
+      // (interphase apoptosis, which follows within ~a day of exposure).
+      blood: { alpha: 0.35, beta: 0.03, apoptosisHalfLife: 0.5 },
+    },
+  },
+  interventions: {
+    gcsf: { amplification: 1.8, mttFactor: 0.7 },
+    tpo: { amplification: 1.6, hscBoost: 0.3 },
+  },
+};
+
+// Individual profile: the part of the model that a digital twin personalises.
+const DEFAULT_PROFILE = {
+  name: 'Reference adult',
+  baseline: { neutrophil: 4.0, platelet: 250, rbc: 14.0, lymphocyte: 2.0 },
+  radiosensitivity: 1.0, // multiplies every alpha and beta
+  marrowReserve: 1.0, // multiplies HSC regeneration rate
+};
+
+// CTCAE v5.0 lower bounds for grades 1..4 (value below bound => at least that grade).
+// Grade-1 bounds are set to typical adult lower limits of normal.
+const CTCAE = {
+  neutrophil: [2.0, 1.5, 1.0, 0.5],
+  platelet: [150, 75, 50, 25],
+  rbc: [12.0, 10.0, 8.0, null], // Hgb grade 4 is life-threatening consequences, not a count
+  lymphocyte: [1.0, 0.8, 0.5, 0.2],
+};
+
+function ctcaeGrade(lineage, value) {
+  const bounds = CTCAE[lineage];
+  let grade = 0;
+  for (let g = 0; g < bounds.length; g++) {
+    if (bounds[g] != null && value < bounds[g]) grade = g + 1;
+  }
+  return grade;
+}
+
+/*
+ * Exposure schedule.
+ *   { kind: 'acute',   day, dose, durationHours = 0, fractions = 1, intervalHours = 24 }
+ *   { kind: 'chronic', startDay, endDay, ratemGyPerDay }
+ * `exposedFraction` is the share of active marrow in the field (1 = whole body).
+ * `shieldedDoseFactor` is the dose to the remaining marrow relative to the field dose.
+ */
+function expandExposures(exposures) {
+  const pulses = []; // { start, end, dose } in days / Gy
+  for (const e of exposures || []) {
+    if (e.kind === 'chronic') {
+      const rate = (e.ratemGyPerDay || 0) / 1000;
+      if (rate > 0 && e.endDay > e.startDay) {
+        pulses.push({ start: e.startDay, end: e.endDay, dose: rate * (e.endDay - e.startDay) });
+      }
+      continue;
+    }
+    const n = Math.max(1, Math.round(e.fractions || 1));
+    const dur = Math.max(0, e.durationHours || 0) / 24;
+    const gap = (e.intervalHours ?? 24) / 24;
+    for (let i = 0; i < n; i++) {
+      const start = (e.day || 0) + i * gap;
+      if ((e.dose || 0) > 0) pulses.push({ start, end: start + dur, dose: e.dose });
+    }
+  }
+  return pulses.sort((a, b) => a.start - b.start);
+}
+
+function totalDose(exposures) {
+  return expandExposures(exposures).reduce((s, p) => s + p.dose, 0);
+}
+
+// Interventions: { kind: 'gcsf' | 'tpo', startDay, endDay } | { kind: 'hsct', day, cellDose }
+function activeFactors(interventions, t, params) {
+  let gcsf = false;
+  let tpo = false;
+  for (const iv of interventions || []) {
+    if (iv.kind === 'gcsf' && t >= iv.startDay && t < iv.endDay) gcsf = true;
+    if (iv.kind === 'tpo' && t >= iv.startDay && t < iv.endDay) tpo = true;
+  }
+  return {
+    gcsf,
+    tpo,
+    amp: {
+      neutrophil: gcsf ? params.interventions.gcsf.amplification : 1,
+      platelet: tpo ? params.interventions.tpo.amplification : 1,
+      rbc: 1,
+      lymphocyte: 1,
+    },
+    mtt: { neutrophil: gcsf ? params.interventions.gcsf.mttFactor : 1, platelet: 1, rbc: 1, lymphocyte: 1 },
+    hscBoost: tpo ? params.interventions.tpo.hscBoost : 0,
+  };
+}
+
+// State layout (Float64Array):
+//   per marrow site s in {0: exposed, 1: shielded}: [S, then per lineage P, Pd, T1, T2, T3]
+//   (Pd = doomed, non-clonogenic progenitors)
+//   then per lineage: blood C (normalised)
+//   then doomed lymphocytes Ld (normalised), then sublethal damage Z for each site.
+const SITE_LEN = 1 + LINEAGES.length * 5;
+const IDX = {
+  site: (s) => s * SITE_LEN,
+  S: (s) => s * SITE_LEN,
+  P: (s, l) => s * SITE_LEN + 1 + l * 5,
+  Pd: (s, l) => s * SITE_LEN + 1 + l * 5 + 1,
+  T: (s, l, k) => s * SITE_LEN + 1 + l * 5 + 2 + k, // k = 0..2
+  C: (l) => 2 * SITE_LEN + l,
+  Ld: 2 * SITE_LEN + LINEAGES.length,
+  Z: (s) => 2 * SITE_LEN + LINEAGES.length + 1 + s,
+};
+const STATE_LEN = 2 * SITE_LEN + LINEAGES.length + 3;
+
+function steadyState() {
+  const y = new Float64Array(STATE_LEN);
+  for (let s = 0; s < 2; s++) {
+    y[IDX.S(s)] = 1;
+    for (let l = 0; l < LINEAGES.length; l++) {
+      y[IDX.P(s, l)] = 1;
+      for (let k = 0; k < 3; k++) y[IDX.T(s, l, k)] = 1;
+    }
+  }
+  for (let l = 0; l < LINEAGES.length; l++) y[IDX.C(l)] = 1;
+  return y;
+}
+
+function derivatives(y, dy, ctx, factors) {
+  const { lin, fx, regen } = ctx;
+  dy.fill(0);
+  // Feedback depends on circulating counts (lymphocyte feedback sees viable + doomed).
+  const fb = new Array(LINEAGES.length);
+  for (let l = 0; l < LINEAGES.length; l++) {
+    const L = lin[l];
+    let c = y[IDX.C(l)];
+    if (l === 3) c += y[IDX.Ld];
+    c = Math.max(c, 1e-9);
+    const amp = factors.amp[LINEAGES[l]];
+    fb[l] = Math.min(L.fmax * amp, Math.pow(1 / c, L.gamma) * amp);
+  }
+  for (let s = 0; s < 2; s++) {
+    const S = y[IDX.S(s)];
+    dy[IDX.S(s)] = regen * (1 + factors.hscBoost) * S * (1 - S);
+    for (let l = 0; l < LINEAGES.length; l++) {
+      const ktr = L_ktr(lin[l], factors.mtt[LINEAGES[l]]);
+      const P = y[IDX.P(s, l)];
+      const Pd = y[IDX.Pd(s, l)];
+      dy[IDX.P(s, l)] = ktr * (S * fb[l] - P);
+      dy[IDX.Pd(s, l)] = -ctx.kdoom * Pd;
+      // Doomed cells still feed maturation until they die out.
+      let prev = P + Pd;
+      for (let k = 0; k < 3; k++) {
+        const T = y[IDX.T(s, l, k)];
+        dy[IDX.T(s, l, k)] = ktr * (prev - T);
+        prev = T;
+      }
+    }
+  }
+  for (let l = 0; l < LINEAGES.length; l++) {
+    const L = lin[l];
+    const influx = fx * y[IDX.T(0, l, 2)] + (1 - fx) * y[IDX.T(1, l, 2)];
+    dy[IDX.C(l)] = L.kcirc * (influx - y[IDX.C(l)]);
+  }
+  dy[IDX.Ld] = -ctx.kapop * y[IDX.Ld];
+  // Z (sublethal damage) handled in the radiation step.
+}
+
+function L_ktr(L, mttFactor) {
+  return 4 / (L.mtt * mttFactor); // 1 proliferating + 3 transit compartments share the MTT
+}
+
+// LQ kill for an increment of dose dd delivered on top of existing sublethal damage Z:
+//   log survival = -(alpha*dd + beta*(dd^2 + 2*Z*dd))
+// Summed over a fast delivery this gives alpha*D + beta*D^2; protracted delivery with
+// repair between increments gives alpha*D + G*beta*D^2 with G < 1.
+function lqSurvival(r, dd, Z, sens) {
+  return Math.exp(-sens * (r.alpha * dd + r.beta * (dd * dd + 2 * Z * dd)));
+}
+
+function irradiate(y, ctx, dd, site) {
+  if (dd <= 0) return;
+  const { lin, sens, params } = ctx;
+  const Z = y[IDX.Z(site)];
+  y[IDX.S(site)] *= lqSurvival(params.hsc, dd, Z, sens);
+  for (let l = 0; l < LINEAGES.length; l++) {
+    const P = y[IDX.P(site, l)];
+    const sp = lqSurvival(lin[l].progenitor, dd, Z, sens);
+    y[IDX.P(site, l)] = P * sp;
+    y[IDX.Pd(site, l)] += P * (1 - sp);
+    y[IDX.T(site, l, 0)] *= lqSurvival(lin[l].precursor, dd, Z, sens);
+  }
+  if (site === 0) {
+    // Circulating lymphocytes: the fraction in the field at the time of exposure
+    // is approximated by the exposed marrow fraction.
+    const li = 3;
+    const surv = lqSurvival(lin[li].blood, dd, Z, sens);
+    const killed = y[IDX.C(li)] * (1 - surv) * ctx.fx;
+    y[IDX.C(li)] -= killed;
+    y[IDX.Ld] += killed;
+  }
+  y[IDX.Z(site)] = Z + dd;
+}
+
+function buildContext(params, profile, fx) {
+  const lin = LINEAGES.map((name) => {
+    const L = params.lineages[name];
+    return { ...L, kcirc: Math.LN2 / L.bloodHalfLife };
+  });
+  return {
+    params,
+    lin,
+    fx,
+    sens: profile.radiosensitivity ?? 1,
+    regen: params.hsc.regen * (profile.marrowReserve ?? 1),
+    mu: Math.LN2 / (params.repairHalfTimeHours / 24),
+    kapop: Math.LN2 / params.lineages.lymphocyte.blood.apoptosisHalfLife,
+    kdoom: Math.LN2 / params.doomedHalfLife,
+  };
+}
+
+/**
+ * Run a simulation.
+ * @param {object} cfg
+ *   exposures, exposedFraction (0..1), shieldedDoseFactor (0..1), interventions,
+ *   days (horizon), profile, params, outputStep (days between stored samples)
+ * @returns {{t:number[], blood:Object, marrow:Object, doseRate:number[], cumDose:number[]}}
+ */
+function simulate(cfg = {}) {
+  const params = cfg.params || DEFAULT_PARAMS;
+  const profile = { ...DEFAULT_PROFILE, ...(cfg.profile || {}) };
+  profile.baseline = { ...DEFAULT_PROFILE.baseline, ...((cfg.profile || {}).baseline || {}) };
+  const fx = clamp(cfg.exposedFraction ?? 1, 0, 1);
+  const shield = clamp(cfg.shieldedDoseFactor ?? 0, 0, 1);
+  const days = cfg.days ?? 60;
+  const outStep = cfg.outputStep ?? 0.25;
+  const dtMax = 0.01; // days (14.4 min)
+  const ctx = buildContext(params, profile, fx);
+  const pulses = expandExposures(cfg.exposures);
+  const hsct = (cfg.interventions || []).filter((i) => i.kind === 'hsct').sort((a, b) => a.day - b.day);
+
+  const y = steadyState();
+  const k1 = new Float64Array(STATE_LEN);
+  const k2 = new Float64Array(STATE_LEN);
+  const k3 = new Float64Array(STATE_LEN);
+  const k4 = new Float64Array(STATE_LEN);
+  const tmp = new Float64Array(STATE_LEN);
+
+  const out = {
+    t: [],
+    blood: Object.fromEntries(LINEAGES.map((n) => [n, []])),
+    bloodRel: Object.fromEntries(LINEAGES.map((n) => [n, []])),
+    marrow: { hsc: [], ...Object.fromEntries(LINEAGES.map((n) => [n, []])) },
+    doseRate: [], // Gy/day to the field, averaged over the output interval
+    cumDose: [],
+    profile,
+    exposedFraction: fx,
+  };
+
+  // Event times: every pulse boundary and HSCT so the integrator lands on them.
+  const breaks = new Set([0, days]);
+  for (const p of pulses) {
+    if (p.start < days) breaks.add(p.start);
+    if (p.end < days) breaks.add(p.end);
+  }
+  for (const h of hsct) if (h.day < days) breaks.add(h.day);
+  for (let t = 0; t <= days + 1e-9; t += outStep) breaks.add(round9(t));
+  const times = [...breaks].filter((t) => t >= 0 && t <= days).sort((a, b) => a - b);
+
+  let cum = 0;
+  let lastCum = 0;
+  let nextOut = 0;
+  let hIdx = 0;
+  const record = (t) => {
+    out.t.push(round9(t));
+    for (let l = 0; l < LINEAGES.length; l++) {
+      const name = LINEAGES[l];
+      let c = y[IDX.C(l)];
+      if (l === 3) c += y[IDX.Ld];
+      out.bloodRel[name].push(c);
+      out.blood[name].push(c * profile.baseline[name]);
+      out.marrow[name].push(fx * y[IDX.P(0, l)] + (1 - fx) * y[IDX.P(1, l)]);
+    }
+    out.marrow.hsc.push(fx * y[IDX.S(0)] + (1 - fx) * y[IDX.S(1)]);
+    out.doseRate.push(out.t.length > 1 ? (cum - lastCum) / outStep : 0);
+    out.cumDose.push(cum);
+    lastCum = cum;
+  };
+
+  const applyInstant = (t) => {
+    // Instantaneous pulses (duration 0) starting at t.
+    for (const p of pulses) {
+      if (p.end === p.start && Math.abs(p.start - t) < 1e-9) {
+        irradiate(y, ctx, p.dose, 0);
+        if (shield > 0) irradiate(y, ctx, p.dose * shield, 1);
+        cum += p.dose;
+      }
+    }
+    while (hIdx < hsct.length && hsct[hIdx].day <= t + 1e-9) {
+      const add = hsct[hIdx].cellDose ?? 0.05;
+      y[IDX.S(0)] += add;
+      y[IDX.S(1)] += add;
+      hIdx++;
+    }
+  };
+
+  const doseRateAt = (t) => {
+    let r = 0;
+    for (const p of pulses) if (p.end > p.start && t >= p.start && t < p.end) r += p.dose / (p.end - p.start);
+    return r;
+  };
+
+  applyInstant(0);
+  record(0);
+  nextOut = outStep;
+  for (let i = 0; i < times.length - 1; i++) {
+    const t0 = times[i];
+    const t1 = times[i + 1];
+    const span = t1 - t0;
+    if (span <= 0) continue;
+    const n = Math.max(1, Math.ceil(span / dtMax - 1e-9));
+    const dt = span / n;
+    const rate = doseRateAt(t0 + span / 2);
+    for (let j = 0; j < n; j++) {
+      const t = t0 + j * dt;
+      const factors = activeFactors(cfg.interventions, t + dt / 2, params);
+      // Radiation (operator split, exact exponential kill per sub-step).
+      if (rate > 0) {
+        const dd = rate * dt;
+        irradiate(y, ctx, dd, 0);
+        if (shield > 0) irradiate(y, ctx, dd * shield, 1);
+        cum += dd;
+      }
+      // Repair of sublethal damage.
+      const decay = Math.exp(-ctx.mu * dt);
+      y[IDX.Z(0)] *= decay;
+      y[IDX.Z(1)] *= decay;
+      // Biology: RK4.
+      derivatives(y, k1, ctx, factors);
+      for (let q = 0; q < STATE_LEN; q++) tmp[q] = y[q] + 0.5 * dt * k1[q];
+      derivatives(tmp, k2, ctx, factors);
+      for (let q = 0; q < STATE_LEN; q++) tmp[q] = y[q] + 0.5 * dt * k2[q];
+      derivatives(tmp, k3, ctx, factors);
+      for (let q = 0; q < STATE_LEN; q++) tmp[q] = y[q] + dt * k3[q];
+      derivatives(tmp, k4, ctx, factors);
+      for (let q = 0; q < STATE_LEN; q++) {
+        y[q] = Math.max(0, y[q] + (dt / 6) * (k1[q] + 2 * k2[q] + 2 * k3[q] + k4[q]));
+      }
+    }
+    applyInstant(t1);
+    if (t1 >= nextOut - 1e-9) {
+      record(t1);
+      nextOut += outStep;
+    }
+  }
+  return out;
+}
+
+/** Clinically oriented summary of a simulation result. */
+function summarize(res) {
+  const summary = {};
+  const t = res.t;
+  for (const name of LINEAGES) {
+    const v = res.blood[name];
+    let minV = Infinity;
+    let minT = 0;
+    for (let i = 0; i < v.length; i++) if (v[i] < minV) { minV = v[i]; minT = t[i]; }
+    const base = res.profile.baseline[name];
+    // Days at grade >= 3 and >= 4.
+    let g3 = 0;
+    let g4 = 0;
+    for (let i = 1; i < v.length; i++) {
+      const g = ctcaeGrade(name, v[i]);
+      const dt = t[i] - t[i - 1];
+      if (g >= 3) g3 += dt;
+      if (g >= 4) g4 += dt;
+    }
+    // Recovery: first time after the nadir that the count is back to >= 80% of baseline.
+    let recovery = null;
+    const nadirIdx = t.indexOf(minT);
+    if (minV < 0.8 * base) {
+      for (let i = nadirIdx; i < v.length; i++) if (v[i] >= 0.8 * base) { recovery = t[i]; break; }
+    }
+    summary[name] = {
+      nadir: minV,
+      nadirDay: minT,
+      nadirRel: minV / base,
+      worstGrade: ctcaeGrade(name, minV),
+      daysGrade3: g3,
+      daysGrade4: g4,
+      recoveryDay: recovery,
+      final: v[v.length - 1],
+    };
+  }
+  summary.hscNadir = Math.min(...res.marrow.hsc);
+  summary.hscFinal = res.marrow.hsc[res.marrow.hsc.length - 1];
+  summary.totalDose = res.cumDose[res.cumDose.length - 1];
+  summary.worstGrade = Math.max(...LINEAGES.map((n) => summary[n].worstGrade));
+  return summary;
+}
+
+/*
+ * Calibration against observed data (e.g. AVATAR bone-marrow tissue chip read-outs).
+ * observations: [{ day, target, value }] where value is relative to unexposed control (1 = control)
+ * and target is one of 'hsc' | 'neutrophil' | 'platelet' | 'rbc' | 'lymphocyte'
+ *   | 'progenitor:<lineage>' (marrow progenitor pool for that lineage).
+ * Fits the radiosensitivity multiplier (and optionally marrow reserve) by grid search on
+ * squared log-ratio error.
+ */
+function modelValue(res, target, day) {
+  let series;
+  if (target === 'hsc') series = res.marrow.hsc;
+  else if (target.startsWith('progenitor:')) series = res.marrow[target.split(':')[1]];
+  else series = res.bloodRel[target];
+  if (!series) return NaN;
+  return interp(res.t, series, day);
+}
+
+function fitProfile(cfg, observations, opts = {}) {
+  const obs = (observations || []).filter((o) => Number.isFinite(o.day) && Number.isFinite(o.value) && o.value > 0);
+  if (!obs.length) throw new Error('No usable observations: each row needs a day, a target and a positive value.');
+  const days = Math.max(cfg.days ?? 30, Math.ceil(Math.max(...obs.map((o) => o.day))) + 1);
+  const sensGrid = opts.sensGrid || range(0.4, 2.0, 0.05);
+  const reserveGrid = opts.fitReserve ? (opts.reserveGrid || range(0.4, 2.0, 0.1)) : [cfg.profile?.marrowReserve ?? 1];
+  const loss = (res) => {
+    let e = 0;
+    for (const o of obs) {
+      const m = Math.max(modelValue(res, o.target, o.day), 1e-6);
+      e += Math.log(m / o.value) ** 2;
+    }
+    return e / obs.length;
+  };
+  let best = { loss: Infinity };
+  const curve = [];
+  for (const r of reserveGrid) {
+    for (const s of sensGrid) {
+      const res = simulate({ ...cfg, days, outputStep: 0.25, profile: { ...cfg.profile, radiosensitivity: s, marrowReserve: r } });
+      const l = loss(res);
+      if (r === reserveGrid[0] || !opts.fitReserve) curve.push({ radiosensitivity: s, loss: l });
+      if (l < best.loss) best = { loss: l, radiosensitivity: s, marrowReserve: r };
+    }
+  }
+  best.rmseLog = Math.sqrt(best.loss);
+  best.n = obs.length;
+  best.curve = curve;
+  return best;
+}
+
+function parseObservationsCSV(text) {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
+  if (!lines.length) return [];
+  const header = lines[0].split(',').map((h) => h.trim().toLowerCase());
+  const di = header.findIndex((h) => h === 'day' || h === 'time_days' || h === 'days');
+  const ti = header.findIndex((h) => h === 'target' || h === 'cell_type' || h === 'population');
+  const vi = header.findIndex((h) => h === 'value' || h === 'relative' || h === 'fraction_of_control');
+  if (di < 0 || ti < 0 || vi < 0) {
+    throw new Error('CSV needs columns named day, target and value (see examples/synthetic_chip_data.csv).');
+  }
+  const valid = new Set(['hsc', ...LINEAGES, ...LINEAGES.map((l) => 'progenitor:' + l)]);
+  const rows = [];
+  for (const line of lines.slice(1)) {
+    const cells = line.split(',').map((c) => c.trim());
+    const target = (cells[ti] || '').toLowerCase();
+    if (!valid.has(target)) continue;
+    rows.push({ day: parseFloat(cells[di]), target, value: parseFloat(cells[vi]) });
+  }
+  return rows;
+}
+
+// Scenario presets. Doses are absorbed dose to active marrow.
+const SCENARIOS = [
+  {
+    id: 'acute-2',
+    name: 'Acute whole-body 2 Gy',
+    group: 'Accident',
+    note: 'Moderate hematopoietic injury; recovery expected without intervention.',
+    exposures: [{ kind: 'acute', day: 0, dose: 2 }],
+    exposedFraction: 1,
+    days: 60,
+  },
+  {
+    id: 'acute-4',
+    name: 'Acute whole-body 4 Gy',
+    group: 'Accident',
+    note: 'Near the untreated human LD50/60 range; deep neutropenia and thrombocytopenia.',
+    exposures: [{ kind: 'acute', day: 0, dose: 4 }],
+    exposedFraction: 1,
+    days: 90,
+  },
+  {
+    id: 'acute-4-gcsf',
+    name: '4 Gy with G-CSF from day 1',
+    group: 'Accident',
+    note: 'Same exposure, with filgrastim-like support for 21 days.',
+    exposures: [{ kind: 'acute', day: 0, dose: 4 }],
+    exposedFraction: 1,
+    interventions: [{ kind: 'gcsf', startDay: 1, endDay: 22 }],
+    days: 90,
+  },
+  {
+    id: 'partial-6',
+    name: 'Partial-body 6 Gy, 60% marrow in field',
+    group: 'Accident',
+    note: 'Shielded marrow repopulates; compare with whole-body exposure.',
+    exposures: [{ kind: 'acute', day: 0, dose: 6 }],
+    exposedFraction: 0.6,
+    days: 90,
+  },
+  {
+    id: 'tbi-12',
+    name: 'TBI 12 Gy in 6 fractions',
+    group: 'Clinical',
+    note: 'Myeloablative conditioning (2 Gy twice daily for 3 days), stem-cell rescue on day 5.',
+    exposures: [{ kind: 'acute', day: 0, dose: 2, fractions: 6, intervalHours: 12, durationHours: 0.25 }],
+    exposedFraction: 1,
+    interventions: [{ kind: 'hsct', day: 5, cellDose: 0.02 }],
+    days: 90,
+  },
+  {
+    id: 'spe',
+    name: 'Solar particle event, 1.5 Gy over 12 h',
+    group: 'Spaceflight',
+    note: 'Large SPE behind light shielding; dose protraction spares marrow relative to an acute 1.5 Gy.',
+    exposures: [{ kind: 'acute', day: 2, dose: 1.5, durationHours: 12 }],
+    exposedFraction: 1,
+    days: 60,
+  },
+  {
+    id: 'gcr-mars',
+    name: 'Deep-space GCR, 0.5 mGy/day for 900 days',
+    group: 'Spaceflight',
+    note: 'Mars-class mission background. Total marrow dose ~0.45 Gy at very low dose rate.',
+    exposures: [{ kind: 'chronic', startDay: 0, endDay: 900, ratemGyPerDay: 0.5 }],
+    exposedFraction: 1,
+    days: 900,
+  },
+];
+
+function scenarioConfig(id) {
+  const s = SCENARIOS.find((x) => x.id === id);
+  if (!s) throw new Error('Unknown scenario ' + id);
+  return {
+    exposures: structuredClone(s.exposures),
+    exposedFraction: s.exposedFraction ?? 1,
+    shieldedDoseFactor: s.shieldedDoseFactor ?? 0,
+    interventions: structuredClone(s.interventions || []),
+    days: s.days ?? 60,
+  };
+}
+
+// --- helpers ---
+function clamp(x, a, b) {
+  return Math.min(b, Math.max(a, x));
+}
+function round9(x) {
+  return Math.round(x * 1e9) / 1e9;
+}
+function range(a, b, step) {
+  const out = [];
+  for (let x = a; x <= b + 1e-9; x += step) out.push(Math.round(x * 1000) / 1000);
+  return out;
+}
+function interp(xs, ys, x) {
+  if (x <= xs[0]) return ys[0];
+  if (x >= xs[xs.length - 1]) return ys[ys.length - 1];
+  let lo = 0;
+  let hi = xs.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (xs[mid] <= x) lo = mid;
+    else hi = mid;
+  }
+  const f = (x - xs[lo]) / (xs[hi] - xs[lo]);
+  return ys[lo] + f * (ys[hi] - ys[lo]);
+}
+
+// ---- src/charts.js ----
+// Small dependency-free SVG chart layer: synced crosshair line charts and a dose timeline.
+// All label text is inserted with textContent.
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const CHART_MARGIN = { left: 50, right: 46 };
+
+function svgEl(tag, attrs = {}, parent) {
+  const el = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) if (v != null) el.setAttribute(k, v);
+  if (parent) parent.appendChild(el);
+  return el;
+}
+function svgText(parent, x, y, str, attrs = {}) {
+  const t = svgEl('text', { x, y, ...attrs }, parent);
+  t.textContent = str;
+  return t;
+}
+
+function niceTicks(min, max, count = 5) {
+  const span = max - min || 1;
+  const raw = span / count;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const norm = raw / mag;
+  const step = (norm < 1.5 ? 1 : norm < 3 ? 2 : norm < 7 ? 5 : 10) * mag;
+  const ticks = [];
+  for (let v = Math.ceil(min / step) * step; v <= max + step * 1e-6; v += step) ticks.push(+v.toFixed(10));
+  return { ticks, step };
+}
+
+function fmtNum(v, digits) {
+  if (!Number.isFinite(v)) return '–';
+  const a = Math.abs(v);
+  const d = digits ?? (a >= 100 ? 0 : a >= 10 ? 1 : a >= 1 ? 2 : a >= 0.1 ? 2 : 3);
+  return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function fmtPct(rel) {
+  const p = rel * 100;
+  if (p >= 10) return p.toFixed(0) + '%';
+  if (p >= 1) return p.toFixed(1) + '%';
+  if (p >= 0.01) return p.toFixed(2) + '%';
+  return '<0.01%';
+}
+function fmtDay(d) {
+  return 'Day ' + (Math.abs(d - Math.round(d)) < 1e-6 ? Math.round(d) : d.toFixed(2));
+}
+
+/** Shared hover state so every chart shows the crosshair at the same day. */
+function createHub(tooltipEl) {
+  const charts = new Set();
+  return {
+    register(c) { charts.add(c); },
+    reset() { charts.clear(); },
+    unregister(c) { charts.delete(c); },
+    show(day, source, clientX, clientY) {
+      for (const c of charts) c.crosshair(day);
+      const rows = source.readout(day);
+      renderTooltip(tooltipEl, fmtDay(day), rows, clientX, clientY);
+    },
+    hide() {
+      for (const c of charts) c.crosshair(null);
+      tooltipEl.hidden = true;
+    },
+  };
+}
+
+function renderTooltip(el, head, rows, x, y) {
+  el.replaceChildren();
+  const h = document.createElement('div');
+  h.className = 'tt-head';
+  h.textContent = head;
+  el.appendChild(h);
+  for (const r of rows) {
+    const row = document.createElement('div');
+    row.className = 'tt-row';
+    const key = document.createElement('span');
+    key.className = 'tt-key' + (r.dash ? ' dash' : '');
+    key.style.borderTopColor = r.color || 'transparent';
+    const name = document.createElement('span');
+    name.className = 'tt-name';
+    name.textContent = r.label;
+    const val = document.createElement('span');
+    val.className = 'tt-val';
+    val.textContent = r.value;
+    row.append(key, name, val);
+    el.appendChild(row);
+  }
+  el.hidden = false;
+  const pad = 14;
+  const w = el.offsetWidth;
+  const hgt = el.offsetHeight;
+  let left = x + pad;
+  if (left + w > window.innerWidth - 8) left = x - pad - w;
+  let top = y - hgt - pad;
+  if (top < 8) top = y + pad;
+  el.style.left = Math.max(8, left) + 'px';
+  el.style.top = top + 'px';
+}
+
+function nearestIndex(t, day) {
+  let lo = 0;
+  let hi = t.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (t[mid] <= day) lo = mid;
+    else hi = mid;
+  }
+  return day - t[lo] < t[hi] - day ? lo : hi;
+}
+
+function xAxis(g, x, days, top, bottom, w, showLabels = true) {
+  const { ticks } = niceTicks(0, days, Math.max(3, Math.min(10, Math.floor(w / 70))));
+  for (const v of ticks) {
+    const px = x(v);
+    svgEl('line', { x1: px, x2: px, y1: top, y2: bottom, stroke: 'var(--grid)', 'stroke-width': 1 }, g);
+    if (showLabels) svgText(g, px, bottom + 14, String(v), { class: 'tick', 'text-anchor': 'middle' });
+  }
+}
+
+/**
+ * Line chart with optional thresholds, comparison series, observations, and log scale.
+ * opts: { t, series:[{label,color,values,dash}], title, unit, log, yMinRel, thresholds, points, height, days, hub, format }
+ */
+function lineChart(el, opts) {
+  el.replaceChildren();
+  const width = Math.max(280, el.clientWidth || 600);
+  const height = opts.height || 210;
+  const m = { top: 30, bottom: 26, ...CHART_MARGIN };
+  const iw = width - m.left - m.right;
+  const ih = height - m.top - m.bottom;
+  const svg = svgEl('svg', { viewBox: `0 0 ${width} ${height}`, width, height, role: 'img' }, el);
+  svg.setAttribute('aria-label', opts.ariaLabel || opts.title);
+  const days = opts.days ?? opts.t[opts.t.length - 1];
+  const x = (d) => m.left + (d / days) * iw;
+  const format = opts.format || ((v) => fmtNum(v));
+
+  // Y domain
+  const all = [];
+  for (const s of opts.series) for (const v of s.values) if (Number.isFinite(v)) all.push(v);
+  for (const p of opts.points || []) all.push(p.y);
+  let y;
+  let yTicks;
+  if (opts.log) {
+    const floor = opts.logFloor ?? 1e-4;
+    const lo = Math.max(floor, Math.min(...all.filter((v) => v > 0), 0.1));
+    const minExp = Math.floor(Math.log10(lo));
+    const maxExp = Math.log10(Math.max(1.5, Math.max(...all) * 1.1));
+    y = (v) => m.top + ih - ((Math.log10(Math.max(v, Math.pow(10, minExp))) - minExp) / (maxExp - minExp)) * ih;
+    yTicks = [];
+    for (let e = minExp; e <= 0; e++) yTicks.push(Math.pow(10, e));
+  } else {
+    const maxV = Math.max(...all, ...(opts.thresholds || []).map((t) => t.value), opts.yMaxMin || 0) * 1.08;
+    const { ticks } = niceTicks(0, maxV, 4);
+    const top = ticks[ticks.length - 1] < maxV ? ticks[ticks.length - 1] + (ticks[1] - ticks[0]) : ticks[ticks.length - 1];
+    if (top > ticks[ticks.length - 1]) ticks.push(top);
+    y = (v) => m.top + ih - (v / top) * ih;
+    yTicks = ticks;
+  }
+
+  // Title
+  svgText(svg, m.left, 14, opts.title, { class: 'ctitle' });
+  if (opts.unit) {
+    const tw = opts.title.length * 7.2;
+    svgText(svg, m.left + tw + 8, 14, opts.unit, { class: 'cunit' });
+  }
+
+  const g = svgEl('g', {}, svg);
+  // Threshold bands
+  for (const th of opts.thresholds || []) {
+    const yy = y(th.value);
+    if (th.band) svgEl('rect', { x: m.left, y: yy, width: iw, height: Math.max(0, m.top + ih - yy), fill: `var(--band-${th.band})` }, g);
+  }
+  // Grid
+  xAxis(g, x, days, m.top, m.top + ih, iw);
+  for (const v of yTicks) {
+    const py = y(v);
+    svgEl('line', { x1: m.left, x2: m.left + iw, y1: py, y2: py, stroke: 'var(--grid)', 'stroke-width': 1 }, g);
+    svgText(g, m.left - 6, py + 3.5, opts.log ? fmtPct(v) : fmtNum(v, Number.isInteger(v) ? 0 : 1), { class: 'tick', 'text-anchor': 'end' });
+  }
+  svgEl('line', { x1: m.left, x2: m.left + iw, y1: m.top + ih, y2: m.top + ih, stroke: 'var(--axis)', 'stroke-width': 1 }, g);
+  for (const th of opts.thresholds || []) {
+    const yy = y(th.value);
+    svgEl('line', { x1: m.left, x2: m.left + iw, y1: yy, y2: yy, stroke: 'var(--axis)', 'stroke-width': 1, 'stroke-dasharray': '3 3' }, g);
+    svgText(g, m.left + iw + 4, yy + 3.5, th.label, { class: 'tlabel' });
+  }
+  if (opts.xLabel) svgText(svg, m.left + iw, height - 2, opts.xLabel, { class: 'tick', 'text-anchor': 'end' });
+
+  // Series (comparison first so the live run sits on top)
+  const ordered = [...opts.series].sort((a, b) => (b.dash ? 1 : 0) - (a.dash ? 1 : 0));
+  for (const s of ordered) {
+    const tt = s.t || opts.t;
+    const step = Math.max(1, Math.floor(tt.length / (iw * 1.5)));
+    let d = '';
+    for (let i = 0; i < tt.length; i += step) {
+      if (tt[i] > days) break;
+      d += (d ? 'L' : 'M') + x(tt[i]).toFixed(1) + ',' + y(s.values[i]).toFixed(1);
+    }
+    svgEl('path', {
+      d, fill: 'none', stroke: s.color, 'stroke-width': s.dash ? 1.5 : 2,
+      'stroke-dasharray': s.dash ? '5 4' : null, 'stroke-linejoin': 'round', 'stroke-linecap': 'round',
+    }, g);
+  }
+  // Observations
+  for (const p of opts.points || []) {
+    if (p.x > days) continue;
+    svgEl('circle', { cx: x(p.x), cy: y(p.y), r: 4.5, fill: 'var(--surface)', stroke: p.color || 'var(--ink-2)', 'stroke-width': 2 }, g);
+  }
+  // End labels (live series only, when few)
+  const live = opts.series.filter((s) => !s.dash);
+  if (opts.endLabels !== false && live.length <= 1) {
+    for (const s of live) {
+      const v = s.values[s.values.length - 1];
+      const tt = s.t || opts.t;
+      const px = x(Math.min(days, tt[tt.length - 1]));
+      svgEl('circle', { cx: px, cy: y(v), r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2 }, g);
+    }
+  }
+  // Nadir marker
+  if (opts.nadir && Number.isFinite(opts.nadir.value)) {
+    const nx = x(opts.nadir.day);
+    const ny = y(opts.nadir.value);
+    svgEl('circle', { cx: nx, cy: ny, r: 4, fill: opts.series[0].color, stroke: 'var(--surface)', 'stroke-width': 2 }, g);
+    const label = 'nadir ' + format(opts.nadir.value);
+    const anchor = nx > m.left + iw - 80 ? 'end' : 'start';
+    const ly = ny - 8 < m.top + 8 ? ny + 16 : ny - 8;
+    svgText(g, nx + (anchor === 'start' ? 6 : -6), ly, label, { class: 'endlabel', 'text-anchor': anchor });
+  }
+
+  // Crosshair + hover
+  const cross = svgEl('line', { y1: m.top, y2: m.top + ih, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  const dots = live.map((s) => svgEl('circle', { r: 4, fill: s.color, stroke: 'var(--surface)', 'stroke-width': 2, visibility: 'hidden' }, svg));
+  const hit = svgEl('rect', { x: m.left, y: m.top, width: iw, height: ih, fill: 'transparent', tabindex: 0 }, svg);
+  hit.setAttribute('aria-label', `${opts.title}: use arrow keys to step through days`);
+
+  const api = {
+    crosshair(day) {
+      if (day == null || day > days) {
+        cross.setAttribute('visibility', 'hidden');
+        dots.forEach((d) => d.setAttribute('visibility', 'hidden'));
+        return;
+      }
+      const px = x(day);
+      cross.setAttribute('x1', px);
+      cross.setAttribute('x2', px);
+      cross.setAttribute('visibility', 'visible');
+      live.forEach((s, k) => {
+        const i = nearestIndex(s.t || opts.t, day);
+        dots[k].setAttribute('cx', px);
+        dots[k].setAttribute('cy', y(s.values[i]));
+        dots[k].setAttribute('visibility', 'visible');
+      });
+    },
+    readout(day) {
+      return opts.series.map((s) => {
+        const i = nearestIndex(s.t || opts.t, day);
+        return { label: s.label, color: s.color, dash: s.dash, value: format(s.values[i]) };
+      });
+    },
+  };
+  if (opts.hub) {
+    opts.hub.register(api);
+    const dayFromEvent = (ev) => {
+      const r = svg.getBoundingClientRect();
+      const sx = ((ev.clientX - r.left) / r.width) * width;
+      const d = ((sx - m.left) / iw) * days;
+      const tt = opts.t;
+      return tt[nearestIndex(tt, Math.max(0, Math.min(days, d)))];
+    };
+    hit.addEventListener('pointermove', (ev) => opts.hub.show(dayFromEvent(ev), api, ev.clientX, ev.clientY));
+    hit.addEventListener('pointerleave', () => opts.hub.hide());
+    let kday = 0;
+    hit.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+      ev.preventDefault();
+      const stepDays = Math.max(1, Math.round(days / 60));
+      kday = Math.max(0, Math.min(days, kday + (ev.key === 'ArrowRight' ? stepDays : -stepDays)));
+      const r = svg.getBoundingClientRect();
+      opts.hub.show(kday, api, r.left + (x(kday) / width) * r.width, r.top + r.height * 0.3);
+    });
+    hit.addEventListener('blur', () => opts.hub.hide());
+  }
+  return api;
+}
+
+/**
+ * Exposure + intervention timeline aligned with the line charts' x axis.
+ * opts: { days, pulses:[{start,end,dose}], chronic:[{startDay,endDay,ratemGyPerDay}], interventions, hub }
+ */
+function timelineChart(el, opts) {
+  el.replaceChildren();
+  const width = Math.max(280, el.clientWidth || 600);
+  const lanes = [];
+  lanes.push('dose');
+  const ivs = opts.interventions || [];
+  if (ivs.length) lanes.push('iv');
+  const laneH = { dose: 64, iv: 30 };
+  const m = { top: 8, bottom: 22, ...CHART_MARGIN };
+  const height = m.top + lanes.reduce((s, l) => s + laneH[l], 0) + m.bottom;
+  const iw = width - m.left - m.right;
+  const svg = svgEl('svg', { viewBox: `0 0 ${width} ${height}`, width, height, role: 'img' }, el);
+  svg.setAttribute('aria-label', 'Timeline of radiation exposures and countermeasures');
+  const days = opts.days;
+  const x = (d) => m.left + (Math.min(d, days) / days) * iw;
+  const g = svgEl('g', {}, svg);
+  xAxis(g, x, days, m.top, height - m.bottom, iw);
+
+  let y0 = m.top;
+  // Dose lane
+  const doseTop = y0 + 16;
+  const doseBase = y0 + laneH.dose - 4;
+  svgText(g, m.left - 6, doseBase, 'Dose', { class: 'tick', 'text-anchor': 'end' });
+  svgEl('line', { x1: m.left, x2: m.left + iw, y1: doseBase, y2: doseBase, stroke: 'var(--axis)', 'stroke-width': 1 }, g);
+  const acute = opts.pulses.filter((p) => !p.chronic);
+  const maxDose = Math.max(0.01, ...acute.map((p) => p.dose));
+  for (const c of opts.chronic || []) {
+    const x1 = x(c.startDay);
+    const x2 = x(Math.min(days, c.endDay));
+    svgEl('rect', { x: x1, y: doseBase - 10, width: Math.max(2, x2 - x1), height: 10, fill: 'var(--accent-wash)', stroke: 'var(--accent)', 'stroke-width': 1, rx: 2 }, g);
+    svgText(g, x1 + 4, doseBase - 14, `${c.ratemGyPerDay} mGy/day`, { class: 'tlabel' });
+  }
+  // cluster nearby pulses for labelling
+  const clusters = [];
+  for (const p of acute) {
+    if (p.start > days) continue;
+    const px = x(p.start);
+    const last = clusters[clusters.length - 1];
+    if (last && px - last.x1 < 22) {
+      last.items.push(p);
+      last.x1 = px;
+    } else clusters.push({ x0: px, x1: px, items: [p] });
+  }
+  for (const p of acute) {
+    if (p.start > days) continue;
+    const h = 8 + ((doseBase - doseTop - 8) * p.dose) / maxDose;
+    const x1 = x(p.start);
+    const w = Math.max(2, x(p.end) - x1);
+    svgEl('rect', { x: x1 - (w <= 2 ? 1 : 0), y: doseBase - h, width: w, height: h, fill: 'var(--accent)', rx: 1 }, g);
+  }
+  for (const c of clusters) {
+    const doses = c.items.map((p) => p.dose);
+    const same = doses.every((d) => Math.abs(d - doses[0]) < 1e-9);
+    const label = c.items.length === 1 ? `${fmtNum(doses[0], doses[0] < 1 ? 2 : 1)} Gy` : same ? `${c.items.length} × ${fmtNum(doses[0], 1)} Gy` : `${fmtNum(doses.reduce((a, b) => a + b, 0), 1)} Gy`;
+    const durH = c.items.length === 1 ? (c.items[0].end - c.items[0].start) * 24 : 0;
+    const full = durH >= 1 ? `${label} over ${fmtNum(durH, 0)} h` : label;
+    const cx = (c.x0 + c.x1) / 2;
+    const anchor = cx > m.left + iw - 60 ? 'end' : cx < m.left + 30 ? 'start' : 'middle';
+    svgText(g, cx + (anchor === 'start' ? 3 : 0), doseTop - 4, full, { class: 'endlabel', 'text-anchor': anchor });
+  }
+  if (!acute.length && !(opts.chronic || []).length) {
+    svgText(g, m.left + 8, doseBase - 8, 'No exposure', { class: 'tlabel' });
+  }
+  y0 += laneH.dose;
+
+  if (lanes.includes('iv')) {
+    const yy = y0 + 8;
+    svgText(g, m.left - 6, yy + 10, 'Rx', { class: 'tick', 'text-anchor': 'end' });
+    // Stack overlapping windows in two rows.
+    let row = 0;
+    for (const iv of ivs) {
+      if (iv.kind === 'hsct') {
+        const px = x(iv.day);
+        svgEl('path', { d: `M${px},${yy} l6,7 l-6,7 l-6,-7 z`, fill: 'var(--iv-hsct)' }, g);
+        svgText(g, px + 9, yy + 11, 'Stem cells', { class: 'tlabel' });
+        continue;
+      }
+      const x1 = x(iv.startDay);
+      const x2 = x(Math.min(days, iv.endDay));
+      const ry = yy + row * 8;
+      svgEl('rect', { x: x1, y: ry, width: Math.max(3, x2 - x1), height: 6, rx: 3, fill: iv.kind === 'gcsf' ? 'var(--iv-gcsf)' : 'var(--iv-tpo)' }, g);
+      svgText(g, x1, ry + 17 + (row ? 0 : 0), iv.kind === 'gcsf' ? 'G-CSF' : 'TPO-RA', { class: 'tlabel' });
+      row = 1 - row;
+    }
+  }
+
+  const cross = svgEl('line', { y1: m.top, y2: height - m.bottom, stroke: 'var(--ink-2)', 'stroke-width': 1, visibility: 'hidden' }, svg);
+  const api = {
+    crosshair(day) {
+      if (day == null || day > days) return cross.setAttribute('visibility', 'hidden');
+      cross.setAttribute('x1', x(day));
+      cross.setAttribute('x2', x(day));
+      cross.setAttribute('visibility', 'visible');
+    },
+    readout() { return []; },
+  };
+  opts.hub?.register(api);
+  return api;
+}
+
+// ---- src/app.js ----
+
+
+const $ = (id) => document.getElementById(id);
+
+// Synthetic example (generated by the model itself: radiosensitivity 1.25, 2 Gy acute, ~10% noise).
+// Kept inline so the single-file build works offline. Mirrors examples/synthetic_chip_data.csv.
+const SYNTHETIC_CSV = `# SYNTHETIC EXAMPLE - generated by this model (radiosensitivity 1.25, 2 Gy acute) with ~10% noise.
+# Not experimental data. Replace with tissue-chip read-outs relative to unexposed control.
+day,target,value
+1,hsc,0.1242
+1,progenitor:neutrophil,0.1410
+1,progenitor:platelet,0.1546
+1,progenitor:rbc,0.1149
+2,hsc,0.1545
+2,progenitor:neutrophil,0.1395
+2,progenitor:platelet,0.1484
+2,progenitor:rbc,0.1391
+4,hsc,0.1777
+4,progenitor:neutrophil,0.1640
+4,progenitor:platelet,0.1654
+4,progenitor:rbc,0.1575
+7,hsc,0.2185
+7,progenitor:neutrophil,0.1995
+7,progenitor:platelet,0.1881
+7,progenitor:rbc,0.1963
+10,hsc,0.2573
+10,progenitor:neutrophil,0.2485
+10,progenitor:platelet,0.2525
+10,progenitor:rbc,0.2282
+14,hsc,0.3380
+14,progenitor:neutrophil,0.3855
+14,progenitor:platelet,0.3100
+14,progenitor:rbc,0.2958
+21,hsc,0.4796
+21,progenitor:neutrophil,0.5197
+21,progenitor:platelet,0.5565
+21,progenitor:rbc,0.4415`;
+
+const MARROW_SERIES = [
+  { key: 'hsc', label: 'Stem cells (HSC)', color: 'var(--series-1)' },
+  { key: 'neutrophil', label: 'Myeloid progenitors', color: 'var(--series-2)' },
+  { key: 'platelet', label: 'Megakaryocyte progenitors', color: 'var(--series-3)' },
+  { key: 'rbc', label: 'Erythroid progenitors', color: 'var(--series-4)' },
+  { key: 'lymphocyte', label: 'Lymphoid progenitors', color: 'var(--series-5)' },
+];
+const GRADE_TEXT = [
+  'No clinically significant cytopenia',
+  'Mild cytopenia',
+  'Moderate cytopenia',
+  'Severe cytopenia',
+  'Life-threatening cytopenia',
+];
+
+const state = {
+  scenarioId: 'acute-4',
+  edited: false,
+  days: 90,
+  exposures: [],
+  fx: 1,
+  shield: 0,
+  gcsf: { on: false, start: 1, end: 22 },
+  tpo: { on: false, start: 1, end: 8 },
+  hsct: { on: false, day: 5, dose: 2 },
+  profile: structuredClone(DEFAULT_PROFILE),
+  params: structuredClone(DEFAULT_PARAMS),
+  observations: [],
+  obsSource: '',
+  compare: null,
+  showTable: false,
+  last: null,
+};
+
+const hub = createHub($('tooltip'));
+
+function loadScenario(id) {
+  const c = scenarioConfig(id);
+  state.scenarioId = id;
+  state.edited = false;
+  state.days = c.days;
+  state.exposures = c.exposures;
+  state.fx = c.exposedFraction;
+  state.shield = c.shieldedDoseFactor;
+  const find = (k) => c.interventions.find((i) => i.kind === k);
+  const g = find('gcsf');
+  const t = find('tpo');
+  const h = find('hsct');
+  state.gcsf = g ? { on: true, start: g.startDay, end: g.endDay } : { on: false, start: 1, end: 22 };
+  state.tpo = t ? { on: true, start: t.startDay, end: t.endDay } : { on: false, start: 1, end: 8 };
+  state.hsct = h ? { on: true, day: h.day, dose: (h.cellDose ?? 0.02) * 100 } : { on: false, day: 5, dose: 2 };
+}
+
+function buildConfig(overrides = {}) {
+  const interventions = [];
+  if (state.gcsf.on) interventions.push({ kind: 'gcsf', startDay: +state.gcsf.start, endDay: +state.gcsf.end });
+  if (state.tpo.on) interventions.push({ kind: 'tpo', startDay: +state.tpo.start, endDay: +state.tpo.end });
+  if (state.hsct.on) interventions.push({ kind: 'hsct', day: +state.hsct.day, cellDose: +state.hsct.dose / 100 });
+  return {
+    exposures: state.exposures,
+    exposedFraction: state.fx,
+    shieldedDoseFactor: state.shield,
+    interventions,
+    days: state.days,
+    outputStep: state.days > 200 ? 1 : 0.25,
+    profile: state.profile,
+    params: state.params,
+    ...overrides,
+  };
+}
+
+// ---------- Controls ----------
+function populateScenarioSelect() {
+  const sel = $('scenario');
+  sel.replaceChildren();
+  const groups = {};
+  for (const s of SCENARIOS) (groups[s.group] ||= []).push(s);
+  for (const [name, list] of Object.entries(groups)) {
+    const og = document.createElement('optgroup');
+    og.label = name;
+    for (const s of list) {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.textContent = s.name;
+      og.appendChild(o);
+    }
+    sel.appendChild(og);
+  }
+  const custom = document.createElement('option');
+  custom.value = 'custom';
+  custom.textContent = 'Custom (edited)';
+  sel.appendChild(custom);
+}
+
+function syncControls() {
+  $('scenario').value = state.edited ? 'custom' : state.scenarioId;
+  const sc = SCENARIOS.find((s) => s.id === state.scenarioId);
+  $('scenario-note').textContent = state.edited ? `Edited from “${sc?.name}”.` : sc?.note || '';
+  const daysSel = $('days');
+  if (![...daysSel.options].some((o) => +o.value === state.days)) {
+    const o = document.createElement('option');
+    o.value = state.days;
+    o.textContent = `${state.days} days`;
+    daysSel.appendChild(o);
+  }
+  daysSel.value = String(state.days);
+  $('fx').value = state.fx;
+  $('shield').value = state.shield;
+  for (const k of ['gcsf', 'tpo']) {
+    $(`${k}-on`).checked = state[k].on;
+    $(`${k}-start`).value = state[k].start;
+    $(`${k}-end`).value = state[k].end;
+  }
+  $('hsct-on').checked = state.hsct.on;
+  $('hsct-day').value = state.hsct.day;
+  $('hsct-dose').value = state.hsct.dose;
+  for (const l of LINEAGES) $(`b-${l}`).value = state.profile.baseline[l];
+  $('sens').value = state.profile.radiosensitivity;
+  $('reserve').value = state.profile.marrowReserve;
+  syncParamInputs();
+  renderExposureList();
+  syncOutputs();
+}
+
+function syncOutputs() {
+  $('fx-out').textContent = Math.round(state.fx * 100) + '%';
+  $('shield-out').textContent = Math.round(state.shield * 100) + '% of field dose';
+  $('sens-out').textContent = '×' + (+state.profile.radiosensitivity).toFixed(2);
+  $('reserve-out').textContent = '×' + (+state.profile.marrowReserve).toFixed(2);
+  for (const k of ['gcsf', 'tpo', 'hsct']) {
+    $(`${k}-on`).closest('.iv').querySelector('.iv-fields').classList.toggle('off', !state[k].on);
+  }
+}
+
+function syncParamInputs() {
+  const p = state.params;
+  $('p-hsc-alpha').value = p.hsc.alpha;
+  $('p-hsc-beta').value = p.hsc.beta;
+  $('p-hsc-regen').value = p.hsc.regen;
+  $('p-repair').value = p.repairHalfTimeHours;
+  $('p-doomed').value = p.doomedHalfLife;
+  $('p-mtt-n').value = p.lineages.neutrophil.mtt;
+}
+
+const EXPOSURE_FIELDS = {
+  acute: [
+    { key: 'day', label: 'Day', step: 0.5, min: 0 },
+    { key: 'dose', label: 'Dose (Gy)', step: 0.1, min: 0 },
+    { key: 'durationHours', label: 'Duration (h)', step: 0.5, min: 0 },
+    { key: 'fractions', label: 'Fractions', step: 1, min: 1 },
+    { key: 'intervalHours', label: 'Interval (h)', step: 1, min: 1 },
+  ],
+  chronic: [
+    { key: 'startDay', label: 'Start day', step: 1, min: 0 },
+    { key: 'endDay', label: 'End day', step: 1, min: 0 },
+    { key: 'ratemGyPerDay', label: 'mGy/day', step: 0.1, min: 0 },
+  ],
+};
+
+function renderExposureList() {
+  const list = $('exposure-list');
+  list.replaceChildren();
+  if (!state.exposures.length) {
+    const p = document.createElement('p');
+    p.className = 'exposure-empty';
+    p.textContent = 'No exposures. Add an acute or chronic exposure to see a response.';
+    list.appendChild(p);
+    return;
+  }
+  state.exposures.forEach((e, idx) => {
+    const box = document.createElement('div');
+    box.className = 'exposure';
+    const top = document.createElement('div');
+    top.className = 'exposure-top';
+    const kind = document.createElement('span');
+    kind.className = 'exposure-kind';
+    kind.textContent = e.kind === 'chronic' ? 'Chronic' : 'Acute';
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'btn btn-icon';
+    rm.textContent = '×';
+    rm.setAttribute('aria-label', `Remove exposure ${idx + 1}`);
+    rm.addEventListener('click', () => {
+      state.exposures.splice(idx, 1);
+      markEdited();
+      renderExposureList();
+      schedule();
+    });
+    top.append(kind, rm);
+    const fields = document.createElement('div');
+    fields.className = 'exposure-fields';
+    for (const f of EXPOSURE_FIELDS[e.kind === 'chronic' ? 'chronic' : 'acute']) {
+      const lab = document.createElement('label');
+      lab.className = 'field mini';
+      const span = document.createElement('span');
+      span.textContent = f.label;
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.id = `exp-${idx}-${f.key}`;
+      inp.step = f.step;
+      inp.min = f.min;
+      const def = f.key === 'fractions' ? 1 : f.key === 'intervalHours' ? 24 : 0;
+      inp.value = e[f.key] ?? def;
+      inp.addEventListener('input', () => {
+        const v = parseFloat(inp.value);
+        if (Number.isFinite(v)) {
+          e[f.key] = v;
+          markEdited();
+          schedule();
+        }
+      });
+      lab.append(span, inp);
+      fields.appendChild(lab);
+    }
+    box.append(top, fields);
+    list.appendChild(box);
+  });
+}
+
+function markEdited() {
+  if (!state.edited) {
+    state.edited = true;
+    $('scenario').value = 'custom';
+    const sc = SCENARIOS.find((s) => s.id === state.scenarioId);
+    $('scenario-note').textContent = `Edited from “${sc?.name}”.`;
+  }
+}
+
+function bindControls() {
+  $('scenario').addEventListener('change', (ev) => {
+    if (ev.target.value === 'custom') return;
+    loadScenario(ev.target.value);
+    syncControls();
+    schedule(0);
+  });
+  $('days').addEventListener('change', (ev) => {
+    state.days = +ev.target.value;
+    schedule(0);
+  });
+  $('add-acute').addEventListener('click', () => {
+    state.exposures.push({ kind: 'acute', day: 0, dose: 1, durationHours: 0, fractions: 1, intervalHours: 24 });
+    markEdited();
+    renderExposureList();
+    schedule();
+  });
+  $('add-chronic').addEventListener('click', () => {
+    state.exposures.push({ kind: 'chronic', startDay: 0, endDay: state.days, ratemGyPerDay: 1 });
+    markEdited();
+    renderExposureList();
+    schedule();
+  });
+  $('fx').addEventListener('input', (ev) => { state.fx = +ev.target.value; markEdited(); syncOutputs(); schedule(); });
+  $('shield').addEventListener('input', (ev) => { state.shield = +ev.target.value; markEdited(); syncOutputs(); schedule(); });
+  for (const k of ['gcsf', 'tpo']) {
+    $(`${k}-on`).addEventListener('change', (ev) => { state[k].on = ev.target.checked; markEdited(); syncOutputs(); schedule(); });
+    $(`${k}-start`).addEventListener('input', (ev) => { state[k].start = +ev.target.value; markEdited(); schedule(); });
+    $(`${k}-end`).addEventListener('input', (ev) => { state[k].end = +ev.target.value; markEdited(); schedule(); });
+  }
+  $('hsct-on').addEventListener('change', (ev) => { state.hsct.on = ev.target.checked; markEdited(); syncOutputs(); schedule(); });
+  $('hsct-day').addEventListener('input', (ev) => { state.hsct.day = +ev.target.value; markEdited(); schedule(); });
+  $('hsct-dose').addEventListener('input', (ev) => { state.hsct.dose = +ev.target.value; markEdited(); schedule(); });
+  for (const l of LINEAGES) {
+    $(`b-${l}`).addEventListener('input', (ev) => {
+      const v = parseFloat(ev.target.value);
+      if (v > 0) { state.profile.baseline[l] = v; schedule(); }
+    });
+  }
+  $('sens').addEventListener('input', (ev) => { state.profile.radiosensitivity = +ev.target.value; syncOutputs(); schedule(); });
+  $('reserve').addEventListener('input', (ev) => { state.profile.marrowReserve = +ev.target.value; syncOutputs(); schedule(); });
+
+  const paramMap = [
+    ['p-hsc-alpha', (p, v) => { p.hsc.alpha = v; }],
+    ['p-hsc-beta', (p, v) => { p.hsc.beta = v; }],
+    ['p-hsc-regen', (p, v) => { p.hsc.regen = v; }],
+    ['p-repair', (p, v) => { p.repairHalfTimeHours = v; }],
+    ['p-doomed', (p, v) => { p.doomedHalfLife = v; }],
+    ['p-mtt-n', (p, v) => { p.lineages.neutrophil.mtt = v; }],
+  ];
+  for (const [id, set] of paramMap) {
+    $(id).addEventListener('input', (ev) => {
+      const v = parseFloat(ev.target.value);
+      if (Number.isFinite(v) && v >= 0) { set(state.params, v); schedule(); }
+    });
+  }
+  $('reset-params').addEventListener('click', () => {
+    state.params = structuredClone(DEFAULT_PARAMS);
+    syncParamInputs();
+    schedule(0);
+  });
+
+  $('pin-btn').addEventListener('click', () => {
+    if (!state.last) return;
+    const sc = SCENARIOS.find((s) => s.id === state.scenarioId);
+    state.compare = { res: state.last.res, label: state.edited ? 'Pinned (custom)' : `Pinned: ${sc.name}` };
+    $('unpin-btn').hidden = false;
+    $('compare-key').hidden = false;
+    renderAll();
+  });
+  $('unpin-btn').addEventListener('click', () => {
+    state.compare = null;
+    $('unpin-btn').hidden = true;
+    $('compare-key').hidden = true;
+    renderAll();
+  });
+
+  $('csv-file').addEventListener('change', async (ev) => {
+    const f = ev.target.files?.[0];
+    if (!f) return;
+    try {
+      loadObservations(await f.text(), f.name);
+    } catch (err) {
+      setObsStatus(err.message, true);
+    }
+    ev.target.value = '';
+  });
+  $('load-example').addEventListener('click', () => loadObservations(SYNTHETIC_CSV, 'synthetic example (2 Gy acute, generated by the model)', true));
+  $('clear-obs').addEventListener('click', () => {
+    state.observations = [];
+    $('fit-result').hidden = true;
+    $('clear-obs').hidden = true;
+    $('fit-btn').disabled = true;
+    setObsStatus('');
+    renderAll();
+  });
+  $('fit-btn').addEventListener('click', runFit);
+
+  $('toggle-table').addEventListener('click', () => {
+    state.showTable = !state.showTable;
+    $('toggle-table').textContent = state.showTable ? 'Hide table' : 'Show table';
+    $('toggle-table').setAttribute('aria-expanded', String(state.showTable));
+    $('table-wrap').hidden = !state.showTable;
+    if (state.showTable) renderTable();
+  });
+  $('copy-csv').addEventListener('click', async () => {
+    const csv = resultsCSV();
+    try {
+      await navigator.clipboard.writeText(csv);
+      $('copy-status').textContent = `Copied ${csv.split('\n').length - 1} rows to the clipboard.`;
+    } catch {
+      if (!state.showTable) $('toggle-table').click();
+      $('copy-status').textContent = 'Clipboard access was blocked. The table below holds the same values.';
+    }
+  });
+
+  let resizeTimer;
+  new ResizeObserver(() => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(renderCharts, 80);
+  }).observe(document.querySelector('.results'));
+}
+
+function setObsStatus(msg, error = false) {
+  const el = $('obs-status');
+  el.textContent = msg;
+  el.classList.toggle('error', error);
+}
+
+function loadObservations(text, source, isExample = false) {
+  const rows = parseObservationsCSV(text);
+  if (!rows.length) throw new Error('No rows with a recognised target were found in that file.');
+  state.observations = rows;
+  state.obsSource = source;
+  if (isExample) {
+    // The example was generated with a 2 Gy acute exposure. Match it so the fit is meaningful.
+    state.exposures = [{ kind: 'acute', day: 0, dose: 2, durationHours: 0, fractions: 1, intervalHours: 24 }];
+    state.fx = 1;
+    state.shield = 0;
+    state.gcsf.on = state.tpo.on = state.hsct.on = false;
+    if (state.days < 30) state.days = 30;
+    markEdited();
+    syncControls();
+  }
+  const targets = new Set(rows.map((r) => r.target)).size;
+  setObsStatus(`${rows.length} observations across ${targets} targets from ${source}.${isExample ? ' Exposure set to 2 Gy acute to match.' : ''}`);
+  $('fit-btn').disabled = false;
+  $('clear-obs').hidden = false;
+  $('fit-result').hidden = true;
+  schedule(0);
+}
+
+function runFit() {
+  const btn = $('fit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Fitting…';
+  setTimeout(() => {
+    try {
+      const fitReserve = $('fit-reserve').checked;
+      const cfg = buildConfig({ outputStep: 0.25 });
+      const best = fitProfile(cfg, state.observations, fitReserve
+        ? { fitReserve: true, sensGrid: grid(0.4, 2, 0.1), reserveGrid: grid(0.5, 2, 0.25) }
+        : {});
+      showFit(best, fitReserve);
+    } catch (err) {
+      setObsStatus(err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Fit profile to data';
+    }
+  }, 30);
+}
+
+function grid(a, b, s) {
+  const out = [];
+  for (let v = a; v <= b + 1e-9; v += s) out.push(Math.round(v * 100) / 100);
+  return out;
+}
+
+function showFit(best, fitReserve) {
+  const box = $('fit-result');
+  box.replaceChildren();
+  const dl = document.createElement('dl');
+  const add = (k, v) => {
+    const dt = document.createElement('dt');
+    dt.textContent = k;
+    const dd = document.createElement('dd');
+    dd.textContent = v;
+    dl.append(dt, dd);
+  };
+  add('Radiosensitivity', '×' + best.radiosensitivity.toFixed(2));
+  if (fitReserve) add('Regenerative reserve', '×' + best.marrowReserve.toFixed(2));
+  add('Fit error (RMS log ratio)', best.rmseLog.toFixed(3));
+  add('Observations', String(best.n));
+  const note = document.createElement('p');
+  note.className = 'hint';
+  note.textContent = 'Grid search over the multiplier(s), minimising squared log error between model and observations under the exposures currently set.';
+  const apply = document.createElement('button');
+  apply.type = 'button';
+  apply.className = 'btn btn-small btn-primary';
+  apply.textContent = 'Apply to profile';
+  apply.addEventListener('click', () => {
+    state.profile.radiosensitivity = best.radiosensitivity;
+    if (fitReserve) state.profile.marrowReserve = best.marrowReserve;
+    state.profile.name = 'Calibrated profile';
+    syncControls();
+    schedule(0);
+  });
+  box.append(dl, note, apply);
+  box.hidden = false;
+}
+
+// ---------- Rendering ----------
+let timer;
+function schedule(delay = 60) {
+  clearTimeout(timer);
+  timer = setTimeout(renderAll, delay);
+}
+
+function renderAll() {
+  const cfg = buildConfig();
+  const res = simulate(cfg);
+  const sum = summarize(res);
+  state.last = { cfg, res, sum };
+  renderSummary();
+  renderCharts();
+  if (state.showTable) renderTable();
+}
+
+function renderSummary() {
+  const { sum, res } = state.last;
+  const cmp = state.compare ? summarize(state.compare.res) : null;
+  const root = $('summary');
+  root.replaceChildren();
+
+  const verdict = document.createElement('div');
+  verdict.className = 'verdict';
+  const main = document.createElement('div');
+  main.className = 'verdict-main';
+  main.append(pill(sum.worstGrade, `Grade ${sum.worstGrade}`));
+  const vt = document.createElement('span');
+  vt.textContent = GRADE_TEXT[sum.worstGrade];
+  main.append(vt);
+  const facts = document.createElement('div');
+  facts.className = 'verdict-facts';
+  const anc = sum.neutrophil;
+  const fact = (label, value) => {
+    const s = document.createElement('span');
+    s.append(label + ' ');
+    const b = document.createElement('b');
+    b.textContent = value;
+    s.append(b);
+    facts.append(s);
+  };
+  fact('Marrow dose', `${fmtNum(sum.totalDose, sum.totalDose < 1 ? 3 : 2)} Gy`);
+  fact('Marrow in field', `${Math.round(res.exposedFraction * 100)}%`);
+  fact('Lowest stem-cell pool', fmtPct(sum.hscNadir));
+  fact('Stem cells at end', fmtPct(sum.hscFinal));
+  fact('ANC < 0.5 for', `${fmtNum(anc.daysGrade4, 1)} days`);
+  verdict.append(main, facts);
+  root.append(verdict);
+
+  const tiles = document.createElement('div');
+  tiles.className = 'tiles';
+  for (const l of LINEAGES) {
+    const s = sum[l];
+    const info = LINEAGE_INFO[l];
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    const lab = document.createElement('div');
+    lab.className = 'tile-label';
+    const name = document.createElement('span');
+    name.textContent = `${info.label} nadir`;
+    lab.append(name, pill(s.worstGrade, `G${s.worstGrade}`));
+    const val = document.createElement('div');
+    val.className = 'tile-value';
+    val.textContent = fmtNum(s.nadir);
+    const unit = document.createElement('small');
+    unit.textContent = info.unit;
+    val.append(unit);
+    const meta = document.createElement('div');
+    meta.className = 'tile-meta';
+    const line = (parts) => {
+      const d = document.createElement('span');
+      for (const p of parts) {
+        if (typeof p === 'string') d.append(p);
+        else {
+          const b = document.createElement('b');
+          b.textContent = p.b;
+          d.append(b);
+        }
+      }
+      meta.append(d);
+    };
+    const changed = s.nadirRel < 0.98;
+    line(changed ? ['on day ', { b: fmtNum(s.nadirDay, 0) }, ` · ${fmtPct(s.nadirRel)} of baseline`] : ['No meaningful drop']);
+    if (s.daysGrade3 > 0) line(['Grade ≥3 for ', { b: fmtNum(s.daysGrade3, 1) }, ' days']);
+    if (s.nadirRel < 0.8) {
+      line(s.recoveryDay != null ? ['Back to 80% by day ', { b: fmtNum(s.recoveryDay, 0) }] : ['Below 80% at end of horizon']);
+    }
+    tile.append(lab, val, meta);
+    if (cmp) {
+      const d = document.createElement('div');
+      d.className = 'tile-delta';
+      d.textContent = `Pinned run: ${fmtNum(cmp[l].nadir)} on day ${fmtNum(cmp[l].nadirDay, 0)}`;
+      tile.append(d);
+    }
+    tiles.append(tile);
+  }
+  root.append(tiles);
+}
+
+function pill(grade, text) {
+  const s = document.createElement('span');
+  s.className = `pill g${grade}`;
+  s.textContent = text;
+  return s;
+}
+
+function renderCharts() {
+  if (!state.last) return;
+  const { res, cfg } = state.last;
+  hub.reset();
+  const days = cfg.days;
+  const pulses = expandExposures(cfg.exposures.filter((e) => e.kind !== 'chronic'));
+  const chronic = cfg.exposures.filter((e) => e.kind === 'chronic');
+  timelineChart($('timeline'), { days, pulses, chronic, interventions: cfg.interventions, hub });
+  const total = res.cumDose[res.cumDose.length - 1];
+  $('timeline-sub').textContent = pulses.length || chronic.length
+    ? `Total marrow dose ${fmtNum(total, total < 1 ? 3 : 2)} Gy. Bar height is proportional to dose.`
+    : 'No exposures set.';
+
+  const cmp = state.compare?.res;
+  for (const l of LINEAGES) {
+    const info = LINEAGE_INFO[l];
+    const bounds = CTCAE[l];
+    const thresholds = [];
+    if (l === 'rbc') {
+      thresholds.push({ value: bounds[1], label: 'G2', band: 'g3' }, { value: bounds[2], label: 'G3', band: 'g4' });
+    } else {
+      thresholds.push({ value: bounds[2], label: 'G3', band: 'g3' }, { value: bounds[3], label: 'G4', band: 'g4' });
+    }
+    const series = [{ label: 'Model', color: 'var(--series-1)', values: res.blood[l] }];
+    if (cmp) series.push({ label: state.compare.label, color: 'var(--compare)', values: cmp.blood[l], t: cmp.t, dash: true });
+    const base = state.profile.baseline[l];
+    const points = state.observations
+      .filter((o) => o.target === l)
+      .map((o) => ({ x: o.day, y: o.value * base, color: 'var(--ink-2)' }));
+    const s = state.last.sum[l];
+    lineChart($(`chart-${l}`), {
+      t: res.t, days, series, title: info.label, unit: info.unit, thresholds, points, hub,
+      yMaxMin: base * 1.1,
+      nadir: s.nadirRel < 0.95 ? { day: s.nadirDay, value: s.nadir } : null,
+      format: (v) => `${fmtNum(v)} ${info.unit}`,
+      ariaLabel: `${info.label} over ${days} days. Nadir ${fmtNum(s.nadir)} ${info.unit} on day ${fmtNum(s.nadirDay, 0)}.`,
+    });
+  }
+
+  const mseries = MARROW_SERIES.map((m) => ({ label: m.label, color: m.color, values: res.marrow[m.key] }));
+  if (cmp) mseries.push({ label: `${state.compare.label} · HSC`, color: 'var(--compare)', values: cmp.marrow.hsc, t: cmp.t, dash: true });
+  const colorFor = Object.fromEntries(MARROW_SERIES.map((m) => [m.key, m.color]));
+  const mpoints = state.observations
+    .filter((o) => o.target === 'hsc' || o.target.startsWith('progenitor:'))
+    .map((o) => ({ x: o.day, y: o.value, color: colorFor[o.target === 'hsc' ? 'hsc' : o.target.split(':')[1]] }));
+  lineChart($('chart-marrow'), {
+    t: res.t, days, series: mseries, title: 'Marrow pools', unit: '% of pre-exposure', log: true, logFloor: 1e-4,
+    points: mpoints, hub, height: 300, endLabels: false, format: fmtPct,
+    ariaLabel: `Marrow stem cell and progenitor pools over ${days} days, log scale.`,
+  });
+  renderMarrowLegend(Boolean(cmp));
+}
+
+function renderMarrowLegend(withCompare) {
+  const el = $('marrow-legend');
+  el.replaceChildren();
+  const item = (label, color, dash) => {
+    const s = document.createElement('span');
+    s.className = 'legend-item';
+    const sw = document.createElement('span');
+    sw.className = 'legend-swatch';
+    sw.style.borderTopColor = color;
+    if (dash) sw.style.borderTopStyle = 'dashed';
+    const t = document.createElement('span');
+    t.textContent = label;
+    s.append(sw, t);
+    el.append(s);
+  };
+  for (const m of MARROW_SERIES) item(m.label, m.color);
+  if (withCompare) item('Pinned run · HSC', 'var(--compare)', true);
+  if (state.observations.some((o) => o.target === 'hsc' || o.target.startsWith('progenitor:'))) {
+    const s = document.createElement('span');
+    s.className = 'legend-item';
+    const d = document.createElement('span');
+    d.className = 'legend-dot';
+    const t = document.createElement('span');
+    t.textContent = 'Observed (loaded data)';
+    s.append(d, t);
+    el.append(s);
+  }
+}
+
+function tableRows() {
+  const { res, cfg } = state.last;
+  const every = Math.max(1, Math.round(cfg.days / 90));
+  const rows = [];
+  for (let i = 0; i < res.t.length; i++) {
+    const d = res.t[i];
+    if (Math.abs(d - Math.round(d)) > 1e-6 || Math.round(d) % every !== 0) continue;
+    rows.push([
+      d,
+      res.blood.neutrophil[i], res.blood.platelet[i], res.blood.rbc[i], res.blood.lymphocyte[i],
+      res.marrow.hsc[i], res.marrow.neutrophil[i], res.marrow.platelet[i], res.marrow.rbc[i], res.marrow.lymphocyte[i],
+      res.cumDose[i],
+    ]);
+  }
+  return rows;
+}
+const TABLE_HEAD = ['Day', 'ANC', 'PLT', 'Hgb', 'ALC', 'HSC %', 'Myeloid %', 'Mega %', 'Erythroid %', 'Lymphoid %', 'Cum. dose Gy'];
+
+function renderTable() {
+  const wrap = $('table-wrap');
+  const table = document.createElement('table');
+  const thead = document.createElement('thead');
+  const hr = document.createElement('tr');
+  for (const h of TABLE_HEAD) {
+    const th = document.createElement('th');
+    th.textContent = h;
+    hr.append(th);
+  }
+  thead.append(hr);
+  const tbody = document.createElement('tbody');
+  for (const r of tableRows()) {
+    const tr = document.createElement('tr');
+    r.forEach((v, k) => {
+      const td = document.createElement('td');
+      td.textContent = k === 0 ? String(v) : k >= 5 && k <= 9 ? (v * 100).toFixed(2) : fmtNum(v, k === 2 ? 0 : 2);
+      tr.append(td);
+    });
+    tbody.append(tr);
+  }
+  table.append(thead, tbody);
+  wrap.replaceChildren(table);
+}
+
+function resultsCSV() {
+  const head = ['day', 'anc_1e9_per_L', 'platelets_1e9_per_L', 'hgb_g_per_dL', 'alc_1e9_per_L', 'hsc_rel', 'myeloid_prog_rel', 'mega_prog_rel', 'erythroid_prog_rel', 'lymphoid_prog_rel', 'cumulative_dose_Gy'];
+  const lines = [head.join(',')];
+  for (const r of tableRows()) lines.push(r.map((v, k) => (k === 0 ? v : +v.toPrecision(5))).join(','));
+  return lines.join('\n');
+}
+
+// ---------- Boot ----------
+populateScenarioSelect();
+loadScenario(state.scenarioId);
+syncControls();
+bindControls();
+renderAll();
+
+</script>
